@@ -73,6 +73,8 @@ namespace SharePointConnect
                     }
                 }
             }
+
+            this.fileName.Replace("." + this.fileExtension.ToLower(), "");
         }
 
 

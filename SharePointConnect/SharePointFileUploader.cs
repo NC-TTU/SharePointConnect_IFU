@@ -1023,7 +1023,7 @@ namespace SharePointConnect
                 logger.Debug(ex.StackTrace);
                 FileInfo info = new FileInfo(filePath);
                 throw new Exception("Error by uploading file: " + info.Name);
-            } finally {;
+            } finally {
                 /****Aufräumarbeit****/
                 Connector.Disconnect();
                 this.clientContext.Dispose();

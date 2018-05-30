@@ -66,5 +66,6 @@ namespace SharePointConnect
         public string GetContactNo() { return this.contactNo; }
         public string GetKeyword() { return this.keyword; }
         public string GetEventNo() { return this.eventNo; }
+        public string GetFileExtension() { return this.fileExtension; }
     }
 }

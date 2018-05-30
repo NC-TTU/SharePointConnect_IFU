@@ -12,7 +12,7 @@ namespace SharePointConnect
         readonly string link;
         readonly string name;
 
-        public FeeAttachment(string link, string name) {
+        public FeeAttachment(string link) {
             this.link = link;
             this.name = link.Split('/')[link.Split('/').Length - 1].Split('.')[0];
         }

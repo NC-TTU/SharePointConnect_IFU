@@ -299,8 +299,8 @@ namespace SharePointConnect
         #endregion
 
         #region Fee
-        public static List<string> GetFeeAttachment(string url, string user, string password, string listname, Guid guid) {
-            List<string> attachmentList = new List<string>();
+        public static List<FeeAttachment> GetFeeAttachment(string url, string user, string password, string listname, Guid guid) {
+            List<FeeAttachment> feeAttachments = new List<FeeAttachment>();
             string[] parts = user.Split('\\');
 
             using (ClientContext clientContext = new ClientContext(url)) {
@@ -332,11 +332,11 @@ namespace SharePointConnect
                 clientContext.Load(attachments);
                 clientContext.ExecuteQuery();
                 foreach (Attachment a in attachments) {
-                    attachmentList.Add(url.Substring(0, url.Length - 1) + a.ServerRelativeUrl);
+                    feeAttachments.Add(new FeeAttachment(url.Substring(0, url.Length - 1) + a.ServerRelativeUrl));
                 }
             }
 
-            return attachmentList;
+            return feeAttachments;
         }
 
 

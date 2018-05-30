@@ -75,7 +75,7 @@ namespace SharePointConnect
                 }
             }
 
-            this.fileName.Replace("." + this.fileExtension.ToLower(), "");
+            this.fileName = this.fileName.Replace("." + this.fileExtension.ToLower(), "");
         }
 
 

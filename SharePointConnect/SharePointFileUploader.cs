@@ -937,11 +937,13 @@ namespace SharePointConnect
                 FileInfo fileInfo = new FileInfo(filePath);
 
                 if (fileInfo.Length <= 1200000) {
+
                     fileCreation.Content = System.IO.File.ReadAllBytes(filePath);
                     fileCreation.Url = fileInfo.Name;
                     fileCreation.Overwrite = true;
 
                     if (CheckIfFileAlreadyExists(filePath, rootFolder)) {
+
                         Microsoft.SharePoint.Client.File existingFile = site.GetFileByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + fileInfo.Name);
                         clientContext.Load(existingFile);
                         clientContext.ExecuteQuery();
@@ -1031,7 +1033,117 @@ namespace SharePointConnect
             }
         }
 
+        public void UploadInvoice(string filePath, string title, string documentNo, string customerName, string customerNo, string grossSum) {
+            try {
+                FileCreationInformation fileCreation = new FileCreationInformation();
 
+                List invoiceArchiveList = this.site.Lists.GetByTitle(this.listName);
+                Folder rootFolder = invoiceArchiveList.RootFolder;
+                this.clientContext.Load(rootFolder, rf => rf.ServerRelativeUrl);
+                this.clientContext.ExecuteQuery();
+
+                FileInfo fileInfo = new FileInfo(filePath);
+                if (filePath.Length <= 1200000) {
+
+                    fileCreation.Content = System.IO.File.ReadAllBytes(filePath);
+                    fileCreation.Url = fileInfo.Name;
+                    fileCreation.Overwrite = true;
+
+                    if (CheckIfFileAlreadyExists(filePath, rootFolder)) {
+
+                        Microsoft.SharePoint.Client.File existingFile = this.site.GetFileByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + fileInfo.Name);
+                        this.clientContext.Load(existingFile);
+                        this.clientContext.ExecuteQuery();
+                        existingFile.CheckOut();
+
+                        this.clientContext.Load(invoiceArchiveList.ContentTypes);
+                        this.clientContext.ExecuteQuery();
+                        ContentType contentType = invoiceArchiveList.ContentTypes.Where(ct => ct.Name == "Ausgangs-Rechnung").First();
+
+                        var uploadedFile = rootFolder.Files.Add(fileCreation);
+                        uploadedFile.ListItemAllFields["ContentTypeId"] = contentType.Id;
+                        uploadedFile.ListItemAllFields["Title"] = title;
+                        uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
+                        uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
+                        uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
+                        uploadedFile.ListItemAllFields.Update();
+                        uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
+
+                        this.clientContext.ExecuteQuery();
+                    } else {
+
+                        this.clientContext.Load(invoiceArchiveList.ContentTypes);
+                        this.clientContext.ExecuteQuery();
+                        ContentType contentType = invoiceArchiveList.ContentTypes.Where(ct => ct.Name == "Ausgangs-Rechnung").First();
+
+                        var uploadedFile = rootFolder.Files.Add(fileCreation);
+                        uploadedFile.ListItemAllFields["ContentTypeId"] = contentType.Id;
+                        uploadedFile.ListItemAllFields["Title"] = title;
+                        uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
+                        uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
+                        uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
+                        uploadedFile.ListItemAllFields.Update();
+
+                        this.clientContext.ExecuteQuery();
+                    }
+                } else {
+                    using (FileStream fs = new FileStream(filePath, FileMode.Open)) {
+
+                        fileCreation.ContentStream = fs;
+                        fileCreation.Url = fileInfo.Name;
+                        fileCreation.Overwrite = true;
+
+                        if (CheckIfFileAlreadyExists(filePath, rootFolder)) {
+
+                            Microsoft.SharePoint.Client.File existingFile = this.site.GetFileByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + fileInfo.Name);
+                            this.clientContext.Load(existingFile);
+                            this.clientContext.ExecuteQuery();
+                            existingFile.CheckOut();
+
+                            this.clientContext.Load(invoiceArchiveList.ContentTypes);
+                            this.clientContext.ExecuteQuery();
+                            ContentType contentType = invoiceArchiveList.ContentTypes.Where(ct => ct.Name == "Ausgangs-Rechnung").First();
+
+                            var uploadedFile = rootFolder.Files.Add(fileCreation);
+                            uploadedFile.ListItemAllFields["ContentTypeId"] = contentType.Id;
+                            uploadedFile.ListItemAllFields["Title"] = title;
+                            uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
+                            uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
+                            uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
+                            uploadedFile.ListItemAllFields.Update();
+                            uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
+
+                            this.clientContext.ExecuteQuery();
+                        } else {
+
+                            this.clientContext.Load(invoiceArchiveList.ContentTypes);
+                            this.clientContext.ExecuteQuery();
+                            ContentType contentType = invoiceArchiveList.ContentTypes.Where(ct => ct.Name == "Ausgangs-Rechnung").First();
+
+                            var uploadedFile = rootFolder.Files.Add(fileCreation);
+                            uploadedFile.ListItemAllFields["ContentTypeId"] = contentType.Id;
+                            uploadedFile.ListItemAllFields["Title"] = title;
+                            uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
+                            uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
+                            uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
+                            uploadedFile.ListItemAllFields.Update();
+
+                            this.clientContext.ExecuteQuery();
+                        }
+                    }
+                }
+            } catch(Exception ex) {
+                logger.Error(ex.Message);
+                logger.Debug(ex.StackTrace);
+                FileInfo info = new FileInfo(filePath);
+                throw new Exception("Error by uploading file: " + info.Name);
+            } finally {
+                /****Aufräumarbeit****/
+                Connector.Disconnect();
+                this.clientContext.Dispose();
+                this.site = null;
+            }
+        }
 
         private bool CheckIfFileAlreadyExists(string filePath, Folder parent) {
 

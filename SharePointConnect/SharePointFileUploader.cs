@@ -1033,7 +1033,7 @@ namespace SharePointConnect
             }
         }
 
-        public void UploadInvoice(string filePath, string title, string documentNo, string customerName, string customerNo, string grossSum) {
+        public void UploadInvoice(string filePath, string title, string documentNo, string customerName, string customerNo, string totalSum) {
             try {
                 FileCreationInformation fileCreation = new FileCreationInformation();
 
@@ -1066,7 +1066,7 @@ namespace SharePointConnect
                         uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
                         uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
-                        uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
+                        uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
                         uploadedFile.ListItemAllFields.Update();
                         uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
 
@@ -1083,7 +1083,7 @@ namespace SharePointConnect
                         uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
                         uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
-                        uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
+                        uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
                         uploadedFile.ListItemAllFields.Update();
 
                         this.clientContext.ExecuteQuery();
@@ -1112,7 +1112,7 @@ namespace SharePointConnect
                             uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
                             uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
-                            uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
+                            uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
                             uploadedFile.ListItemAllFields.Update();
                             uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
 
@@ -1129,7 +1129,7 @@ namespace SharePointConnect
                             uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
                             uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
-                            uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
+                            uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
                             uploadedFile.ListItemAllFields.Update();
 
                             this.clientContext.ExecuteQuery();

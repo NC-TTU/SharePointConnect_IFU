@@ -1064,6 +1064,7 @@ namespace SharePointConnect
                         uploadedFile.ListItemAllFields["ContentTypeId"] = contentType.Id;
                         uploadedFile.ListItemAllFields["Title"] = title;
                         uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
+                        uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
                         uploadedFile.ListItemAllFields.Update();
@@ -1080,6 +1081,7 @@ namespace SharePointConnect
                         uploadedFile.ListItemAllFields["ContentTypeId"] = contentType.Id;
                         uploadedFile.ListItemAllFields["Title"] = title;
                         uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
+                        uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
                         uploadedFile.ListItemAllFields.Update();
@@ -1108,6 +1110,7 @@ namespace SharePointConnect
                             uploadedFile.ListItemAllFields["ContentTypeId"] = contentType.Id;
                             uploadedFile.ListItemAllFields["Title"] = title;
                             uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
+                            uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
                             uploadedFile.ListItemAllFields.Update();
@@ -1124,6 +1127,7 @@ namespace SharePointConnect
                             uploadedFile.ListItemAllFields["ContentTypeId"] = contentType.Id;
                             uploadedFile.ListItemAllFields["Title"] = title;
                             uploadedFile.ListItemAllFields["IFUInvoiceCustomer"] = customerName;
+                            uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = grossSum;
                             uploadedFile.ListItemAllFields.Update();

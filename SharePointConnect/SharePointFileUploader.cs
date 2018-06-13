@@ -1033,7 +1033,7 @@ namespace SharePointConnect
             }
         }
 
-        public void UploadInvoice(string filePath, string title, string documentNo, string customerName, string customerNo, string totalSum) {
+        public void UploadInvoice(string filePath, string title, string documentNo, string customerName, string customerNo, decimal totalSum) {
             try {
                 FileCreationInformation fileCreation = new FileCreationInformation();
 

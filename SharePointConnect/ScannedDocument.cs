@@ -17,6 +17,7 @@ namespace SharePointConnect
         readonly string keyword;
         readonly string eventNo;
         readonly string fileExtension;
+        readonly string responsibleUser;
 
         public ScannedDocument(Dictionary<string,object> scannedDocument, string filePath) {
             this.guid = Guid.Empty;
@@ -27,8 +28,9 @@ namespace SharePointConnect
             this.keyword = String.Empty;
             this.eventNo = String.Empty;
             this.fileExtension = String.Empty;
+            this.responsibleUser = String.Empty;
 
-            foreach(KeyValuePair<string,object> pair in scannedDocument) {
+            foreach (KeyValuePair<string,object> pair in scannedDocument) {
                 if(pair.Value != null) {
                     switch (pair.Key) {
                         case "GUID":
@@ -52,6 +54,11 @@ namespace SharePointConnect
                         case "File_x0020_Type":
                             this.fileExtension = pair.Value.ToString();
                             break;
+                        case "IFUZustaendigePerson":
+                            Microsoft.SharePoint.Client.FieldUserValue fuv = (Microsoft.SharePoint.Client.FieldUserValue)pair.Value;
+                            this.responsibleUser = fuv.LookupValue.ToString();
+                            break;
+
                     }
                 }
             }
@@ -67,5 +74,6 @@ namespace SharePointConnect
         public string GetKeyword() { return this.keyword; }
         public string GetEventNo() { return this.eventNo; }
         public string GetFileExtension() { return this.fileExtension; }
+        public string GetResponsibleUser() { return this.responsibleUser; }
     }
 }

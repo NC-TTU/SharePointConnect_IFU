@@ -375,7 +375,7 @@ namespace SharePointConnect
 
             TaxonomySession tSession = TaxonomySession.GetTaxonomySession(clientContext);
             TermStore ts = tSession.GetDefaultSiteCollectionTermStore();
-            TermSet tset = ts.GetTermSet(termSetId);
+            TermSet tSet = ts.GetTermSet(termSetId);
 
             LabelMatchInformation lmi = new LabelMatchInformation(clientContext) {
                 Lcid = 1033,
@@ -383,10 +383,10 @@ namespace SharePointConnect
                 TermLabel = term
             };
 
-            TermCollection termMatches = tset.GetTerms(lmi);
+            TermCollection termMatches = tSet.GetTerms(lmi);
             this.clientContext.Load(tSession);
             this.clientContext.Load(ts);
-            this.clientContext.Load(tset);
+            this.clientContext.Load(tSet);
             this.clientContext.Load(termMatches);
 
             this.clientContext.ExecuteQuery();

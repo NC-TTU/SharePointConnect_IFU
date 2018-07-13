@@ -77,6 +77,13 @@ namespace SharePointConnect
             }
         }
 
+        static public List<string> SplitContactString(string contacts) {
+            List<string> contactList = new List<string>();
+
+            contactList.AddRange(contacts.Split('|'));
+
+            return contactList;
+        }
 
         static public void UpdateRegistration(string baseUrl, string subWebsite, string user, string password, string listname, Registration registration) {
             try {

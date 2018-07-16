@@ -19,7 +19,7 @@ namespace SharePointConnect
         readonly string fileExtension;
         readonly string responsibleUser;
 
-        public ScannedDocument(Dictionary<string,object> scannedDocument, string filePath) {
+        public ScannedDocument(Dictionary<string,object> scannedDocument, string filePath, string responsibleUser) {
             this.guid = Guid.Empty;
             this.fileName = String.Empty;
             this.filePath = filePath;
@@ -55,8 +55,7 @@ namespace SharePointConnect
                             this.fileExtension = pair.Value.ToString();
                             break;
                         case "IFUZustaendigePerson":
-                            Microsoft.SharePoint.Client.FieldUserValue fuv = (Microsoft.SharePoint.Client.FieldUserValue)pair.Value;
-                            this.responsibleUser = fuv.LookupValue.ToString();
+                            this.responsibleUser = responsibleUser;
                             break;
 
                     }

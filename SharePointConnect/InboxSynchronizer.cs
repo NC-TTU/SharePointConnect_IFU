@@ -531,10 +531,17 @@ namespace SharePointConnect
                     FileInformation fileInfo = Microsoft.SharePoint.Client.File.OpenBinaryDirect(clientContext, fileServerRelativePath);
                     string filePath = Path.Combine(navTempPath, li.File.Name);
 
+                    Dictionary<string,object> userValue = li.FieldValues.Where(fv => fv.Key == "IFUZustaendigePerson").ToDictionary(fv=> fv.Key, fv => fv.Value);
+                    FieldUserValue fuv = (FieldUserValue) userValue.First().Value;
+                    
+                    User responsibleUser = site.SiteUsers.Where(u=> u.Id == fuv.LookupId).First();
+                    clientContext.Load(responsibleUser);
+                    clientContext.ExecuteQuery();
+
                     using (FileStream fs = System.IO.File.Create(filePath)) {
                         fileInfo.Stream.CopyTo(fs);
                     }
-                    scannedDocuments.Add(new ScannedDocument(li.FieldValues, filePath));
+                    scannedDocuments.Add(new ScannedDocument(li.FieldValues, filePath, responsibleUser.LoginName.Split('|')[1]));
 
                     li.DeleteObject();                 
                 }

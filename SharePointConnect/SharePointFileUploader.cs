@@ -94,7 +94,7 @@ namespace SharePointConnect
         // Elternordner der Datei. Danach wird die FileCreationInformation-Klasse mit den Datei
         // Informationen gefüllt und am Ende zu einer SharePoint.Client.File gemacht.
         // Und dann wird diese durch den ClientContext hochgeladen.
-        public void UploadFile(string filePath, SharePointFolder parentFolder) {
+        private void UploadFile(string filePath, SharePointFolder parentFolder) {
             try {
                 FileCreationInformation newFile = new FileCreationInformation();
                 Folder folder = this.site.GetFolderByServerRelativeUrl(parentFolder.GetServerRelativeUrl());
@@ -169,7 +169,7 @@ namespace SharePointConnect
             }
         }
 
-        public void UploadFile(string filePath, string folderServerRelativeUrl) {
+        private void UploadFile(string filePath, string folderServerRelativeUrl) {
             FileCreationInformation newFile = new FileCreationInformation();
             Folder folder = this.site.GetFolderByServerRelativeUrl(folderServerRelativeUrl);
             Microsoft.SharePoint.Client.File uploadFile;
@@ -234,6 +234,78 @@ namespace SharePointConnect
             Connector.Disconnect();
             this.clientContext.Dispose();
             this.site = null;
+        }
+
+        public void UploadFileDragnDrop(string filePath, string parentFolder) {
+            try {
+                FileCreationInformation fileCreation = new FileCreationInformation();
+                List list = this.site.Lists.GetByTitle(this.listName);
+                Folder rootFolder = list.RootFolder;
+                this.clientContext.Load(rootFolder, rf => rf.ServerRelativeUrl);
+                this.clientContext.ExecuteQuery();
+
+                Folder targetFolder = this.site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + parentFolder);
+                this.clientContext.Load(targetFolder);
+                this.clientContext.ExecuteQuery();
+
+                FileInfo fileInfo = new FileInfo(filePath);
+
+                if (fileInfo.Length <= 1200000) {
+                    fileCreation.Content = System.IO.File.ReadAllBytes(filePath);
+                    fileCreation.Url = targetFolder.ServerRelativeUrl + "/" + fileInfo.Name;
+                    fileCreation.Overwrite = true;
+
+                    if (CheckIfFileAlreadyExists(filePath, targetFolder)) {
+                        Microsoft.SharePoint.Client.File existingFile = this.site.GetFileByServerRelativeUrl(targetFolder.ServerRelativeUrl + "/" + fileInfo.Name);
+                        this.clientContext.Load(existingFile);
+                        this.clientContext.ExecuteQuery();
+                        existingFile.CheckOut();
+
+                        var uploadedFile = targetFolder.Files.Add(fileCreation);
+                        uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
+
+                        this.clientContext.ExecuteQuery();
+
+                    } else {
+                        var uploadedFile = targetFolder.Files.Add(fileCreation);
+                        this.clientContext.Load(uploadedFile);
+                        this.clientContext.ExecuteQuery();
+                    }
+                } else {
+                    using(FileStream fs = new FileStream(filePath, FileMode.Open)) {
+                        fileCreation.ContentStream = fs;
+                        fileCreation.Url = targetFolder.ServerRelativeUrl + "/" + fileInfo.Name;
+                        fileCreation.Overwrite = true;
+
+                        if(CheckIfFileAlreadyExists(filePath, targetFolder)) {
+                            Microsoft.SharePoint.Client.File existingFile = this.site.GetFileByServerRelativeUrl(targetFolder.ServerRelativeUrl + "/" + fileInfo.Name);
+                            this.clientContext.Load(existingFile);
+                            this.clientContext.ExecuteQuery();
+                            existingFile.CheckOut();
+
+                            var uploadedFile = targetFolder.Files.Add(fileCreation);
+                            uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
+
+                            this.clientContext.ExecuteQuery();
+
+                        } else {
+                            var uploadedFile = targetFolder.Files.Add(fileCreation);
+                            this.clientContext.Load(uploadedFile);
+                            this.clientContext.ExecuteQuery();
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                logger.Error(ex.Message);
+                logger.Debug(ex.StackTrace);
+                FileInfo info = new FileInfo(filePath);
+                throw new Exception("Error by uploading file: " + info.Name);
+            } finally {
+                /****Aufräumarbeit****/
+                Connector.Disconnect();
+                this.clientContext.Dispose();
+                this.site = null;
+            }
         }
 
         // Aktualisiert die SharePointDataList und gibt diese zurück an die
@@ -406,6 +478,8 @@ namespace SharePointConnect
                 Microsoft.SharePoint.Client.File file;
                 string fileServerRelativePath = String.Empty;
                 string itemID = String.Empty;
+                int year = (int.Parse(businessYear)) + 1;
+                businessYear = businessYear + "/" + year;
 
                 List documentList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = documentList.RootFolder;
@@ -642,7 +716,7 @@ namespace SharePointConnect
             }
         }
 
-        public void UploadEventDocument(string filePath, string eventNo, string ifuTown, string title, string activityDate, string documentType) {
+        public void UploadEventDocument(string filePath, string templateNo, string eventNo, string title, string activityDate, string documentType) {
             try {
                 DateTime dt = DateTime.Parse(activityDate);
                 FileCreationInformation fileCreation = new FileCreationInformation();
@@ -655,7 +729,7 @@ namespace SharePointConnect
                 this.clientContext.Load(rootFolder, rf => rf.ServerRelativeUrl);
                 this.clientContext.ExecuteQuery();
 
-                Folder parent = this.site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + eventNo + "/" + ifuTown);
+                Folder parent = this.site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + templateNo + "/" + eventNo);
                 this.clientContext.Load(parent);
                 this.clientContext.ExecuteQuery();
 
@@ -766,7 +840,7 @@ namespace SharePointConnect
                 itemID = item.Id.ToString();
 
                 if (!String.IsNullOrEmpty(itemID) && !String.IsNullOrEmpty(documentType)) {
-                    UpdateDocumentTypeEvent(documentType, itemID, fileInfo.Name, eventNo, ifuTown);
+                    UpdateDocumentTypeEvent(documentType, itemID, fileInfo.Name, templateNo, eventNo);
                 }
             } catch(Exception ex) {
                 logger.Error(ex.Message);
@@ -1069,7 +1143,7 @@ namespace SharePointConnect
                         uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
-                        //uploadedFile.ListItemAllFields[""] = eventNo;
+                        uploadedFile.ListItemAllFields["IFUEventnumber"] = eventNo;
                         //uploadedFile.ListItemAllFields[""] = articleNo;
                         uploadedFile.ListItemAllFields.Update();
                         uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
@@ -1088,7 +1162,7 @@ namespace SharePointConnect
                         uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
-                        //uploadedFile.ListItemAllFields[""] = eventNo;
+                        uploadedFile.ListItemAllFields["IFUEventnumber"] = eventNo;
                         //uploadedFile.ListItemAllFields[""] = articleNo;
                         uploadedFile.ListItemAllFields.Update();
 
@@ -1119,7 +1193,7 @@ namespace SharePointConnect
                             uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
-                            //uploadedFile.ListItemAllFields[""] = eventNo;
+                            uploadedFile.ListItemAllFields["IFUEventnumber"] = eventNo;
                             //uploadedFile.ListItemAllFields[""] = articleNo;
                             uploadedFile.ListItemAllFields.Update();
                             uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
@@ -1138,7 +1212,7 @@ namespace SharePointConnect
                             uploadedFile.ListItemAllFields["IFUInvoiceCustomerNumber"] = customerNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
-                            //uploadedFile.ListItemAllFields[""] = eventNo;
+                            uploadedFile.ListItemAllFields["IFUEventnumber"] = eventNo;
                             //uploadedFile.ListItemAllFields[""] = articleNo;
                             uploadedFile.ListItemAllFields.Update();
 

@@ -1144,7 +1144,6 @@ namespace SharePointConnect
                         uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
                         uploadedFile.ListItemAllFields["IFUEventnumber"] = eventNo;
-                        //uploadedFile.ListItemAllFields[""] = articleNo;
                         uploadedFile.ListItemAllFields.Update();
                         uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
 
@@ -1163,7 +1162,6 @@ namespace SharePointConnect
                         uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                         uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
                         uploadedFile.ListItemAllFields["IFUEventnumber"] = eventNo;
-                        //uploadedFile.ListItemAllFields[""] = articleNo;
                         uploadedFile.ListItemAllFields.Update();
 
                         this.clientContext.ExecuteQuery();
@@ -1194,7 +1192,6 @@ namespace SharePointConnect
                             uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
                             uploadedFile.ListItemAllFields["IFUEventnumber"] = eventNo;
-                            //uploadedFile.ListItemAllFields[""] = articleNo;
                             uploadedFile.ListItemAllFields.Update();
                             uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
 
@@ -1213,7 +1210,6 @@ namespace SharePointConnect
                             uploadedFile.ListItemAllFields["IFUInvoiceInvoiceNumber"] = documentNo;
                             uploadedFile.ListItemAllFields["IFUInvoiceTotal"] = totalSum;
                             uploadedFile.ListItemAllFields["IFUEventnumber"] = eventNo;
-                            //uploadedFile.ListItemAllFields[""] = articleNo;
                             uploadedFile.ListItemAllFields.Update();
 
                             this.clientContext.ExecuteQuery();

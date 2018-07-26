@@ -531,6 +531,8 @@ namespace SharePointConnect
                     FileInformation fileInfo = Microsoft.SharePoint.Client.File.OpenBinaryDirect(clientContext, fileServerRelativePath);
                     string filePath = Path.Combine(navTempPath, li.File.Name);
 
+                    clientContext.Load(li);
+                    clientContext.ExecuteQuery();
                     Dictionary<string,object> userValue = li.FieldValues.Where(fv => fv.Key == "IFUZustaendigePerson").ToDictionary(fv=> fv.Key, fv => fv.Value);
                     FieldUserValue fuv = (FieldUserValue) userValue.First().Value;
                     

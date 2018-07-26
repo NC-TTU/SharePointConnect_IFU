@@ -539,16 +539,20 @@ namespace SharePointConnect
 
                     clientContext.Load(site.SiteUsers);
                     clientContext.ExecuteQuery();
-
-                    User responsibleUser = site.SiteUsers.Where(u=> u.Id == fuv.LookupId).First();
-                    clientContext.Load(responsibleUser);
-                    clientContext.ExecuteQuery();
-
+                    User responsibleUser = null;
+                    if (fuv != null) {
+                        responsibleUser = site.SiteUsers.Where(u => u.Id == fuv.LookupId).First();
+                        clientContext.Load(responsibleUser);
+                        clientContext.ExecuteQuery();
+                    }
                     using (FileStream fs = System.IO.File.Create(filePath)) {
                         fileInfo.Stream.CopyTo(fs);
                     }
-                    scannedDocuments.Add(new ScannedDocument(li.FieldValues, filePath, responsibleUser.LoginName.Split('|')[1]));
-
+                    if (responsibleUser != null) {
+                        scannedDocuments.Add(new ScannedDocument(li.FieldValues, filePath, responsibleUser.LoginName.Split('|')[1]));
+                    } else {
+                        scannedDocuments.Add(new ScannedDocument(li.FieldValues, filePath, String.Empty));
+                    }
                     li.DeleteObject();                 
                 }
                 clientContext.ExecuteQuery();

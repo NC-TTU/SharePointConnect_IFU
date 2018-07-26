@@ -525,7 +525,7 @@ namespace SharePointConnect
 
                 for(int i = 0; i < itemColl.Count; ++i){
                     ListItem li = itemColl[i];
-                    clientContext.Load(li, f => f.File);
+                    clientContext.Load(li, f => f.File, fv => fv.FieldValues);
                     clientContext.ExecuteQuery();
                     string fileServerRelativePath = li.File.ServerRelativeUrl;
                     FileInformation fileInfo = Microsoft.SharePoint.Client.File.OpenBinaryDirect(clientContext, fileServerRelativePath);

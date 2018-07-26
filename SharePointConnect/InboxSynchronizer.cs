@@ -535,7 +535,10 @@ namespace SharePointConnect
                     clientContext.ExecuteQuery();
                     Dictionary<string,object> userValue = li.FieldValues.Where(fv => fv.Key == "IFUZustaendigePerson").ToDictionary(fv=> fv.Key, fv => fv.Value);
                     FieldUserValue fuv = (FieldUserValue) userValue.First().Value;
-                    
+
+                    clientContext.Load(site.SiteUsers);
+                    clientContext.ExecuteQuery();
+
                     User responsibleUser = site.SiteUsers.Where(u=> u.Id == fuv.LookupId).First();
                     clientContext.Load(responsibleUser);
                     clientContext.ExecuteQuery();

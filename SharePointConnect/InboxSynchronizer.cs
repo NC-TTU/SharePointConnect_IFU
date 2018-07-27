@@ -64,7 +64,7 @@ namespace SharePointConnect
 
                     clientContext.ExecuteQuery();
                 } else {
-                    logger.Error("Es wurde keine Rechnung gefunden!");
+                    logger.Debug("Es wurde keine Rechnung gefunden!");
                     logger.Debug("Baseurl: " + baseUrl);
                     logger.Debug("Subwebsite: " + subWebsite);
                     logger.Debug("Listenmane: " + listname);

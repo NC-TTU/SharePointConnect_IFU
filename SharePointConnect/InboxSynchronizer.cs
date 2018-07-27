@@ -71,7 +71,6 @@ namespace SharePointConnect
                     logger.Debug("Benutzer: " + user);
                     logger.Debug("Barcode: " + barcode);
                     logger.Debug("Elemente in Collection: " + itemColl.Count);
-                    throw new ArgumentNullException("There was no Invoice found with the barcode: " + barcode);
                 }
             }
         }

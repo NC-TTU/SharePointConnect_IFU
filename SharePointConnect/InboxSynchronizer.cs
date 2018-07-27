@@ -16,7 +16,7 @@ namespace SharePointConnect
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(InboxSynchronizer));
 
-        static public void ChangeStatusToPaid(string baseUrl, string subWebsite, string user, string password, string listname, string barcode) {
+        static public void ChangeInvoiceStatusToPaid(string baseUrl, string subWebsite, string user, string password, string listname, string barcode) {
             string[] parts = user.Split('\\');
 
             using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {

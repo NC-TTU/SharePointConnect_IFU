@@ -75,6 +75,7 @@ namespace SharePointConnect
                 }
             }
         }
+
         #region Registrations
         static public void UpdateRegistration(string baseUrl, string subWebsite, string user, string password, string listname, BrochureOrder brochureOrder) {
             try {

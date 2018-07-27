@@ -16,6 +16,65 @@ namespace SharePointConnect
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(InboxSynchronizer));
 
+        static public void ChangeStatusToPaid(string baseUrl, string subWebsite, string user, string password, string listname, string barcode) {
+            string[] parts = user.Split('\\');
+
+            using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+                clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
+
+                Web site = clientContext.Web;
+
+                List list = site.Lists.GetByTitle(listname);
+
+                CamlQuery query = new CamlQuery() {
+                    ViewXml = "<View Scope=\"RecursiveAll\"> " +
+                                  "<Query>" +
+                                      "<Where>" +
+                                          "<Eq>" +
+                                              "<FieldRef Name=\"IFUInvoiceStatus\" />" +
+                                              "<Value Type=\"Text\">" + "Genehmigt" + "</Value>" +
+                                          "</Eq>" +
+                                      "</Where>" +
+                                  "</Query>" +
+                              "</View>"
+                };
+
+                ListItemCollection itemColl = list.GetItems(query);
+                clientContext.Load(itemColl);
+                clientContext.ExecuteQuery();
+
+                ListItem item = null;
+                foreach (ListItem li in itemColl) {
+                    clientContext.Load(li);
+                    clientContext.ExecuteQuery();
+                    if (li.FieldValues["IFUInvoiceBarcode"] != null) {
+                        if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
+                            item = li;
+                            break;
+                        }
+                    }
+                }
+
+                if (item != null) {
+                    clientContext.Load(item);
+                    clientContext.ExecuteQuery();
+
+                    item["IFUInvoiceStatus"] = "Fakturiert";
+                    item.Update();
+
+                    clientContext.ExecuteQuery();
+                } else {
+                    logger.Error("Es wurde keine Rechnung gefunden!");
+                    logger.Debug("Baseurl: " + baseUrl);
+                    logger.Debug("Subwebsite: " + subWebsite);
+                    logger.Debug("Listenmane: " + listname);
+                    logger.Debug("Benutzer: " + user);
+                    logger.Debug("Barcode: " + barcode);
+                    logger.Debug("Elemente in Collection: " + itemColl.Count);
+                    throw new ArgumentNullException("There was no Invoice found with the barcode: " + barcode);
+                }
+            }
+        }
         #region Registrations
         static public void UpdateRegistration(string baseUrl, string subWebsite, string user, string password, string listname, BrochureOrder brochureOrder) {
             try {
@@ -559,7 +618,6 @@ namespace SharePointConnect
             }
             return scannedDocuments;
         } 
-
         #endregion
     }
 }

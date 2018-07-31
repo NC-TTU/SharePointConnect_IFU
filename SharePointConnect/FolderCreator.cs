@@ -190,7 +190,7 @@ namespace SharePointConnect
 
                 List contactList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = contactList.RootFolder;
-                clientContext.Load(rootFolder);
+                clientContext.Load(rootFolder, sru => sru.ServerRelativeUrl);
                 clientContext.ExecuteQuery();
 
                 ListItemCreationInformation listItem = new ListItemCreationInformation();
@@ -220,25 +220,18 @@ namespace SharePointConnect
 
         // Aktualisiert eine Veranstaltung und setzt die Properties vom Contenttype Veranstaltung
         // in der Liste auf die übergebenen Stringwerte;
-        public void UpdateIFUEvent(string eventNo, string description, string eventInfo, string startDate) {
+        public void UpdateIFUEvent(string templateNo, string description, string eventInfo, string startDate) {
             try {
 
                 List eventList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = eventList.RootFolder;
-                this.clientContext.Load(rootFolder);
+                this.clientContext.Load(rootFolder, sru => sru.ServerRelativeUrl);
                 this.clientContext.ExecuteQuery();
 
-                ListItemCollection listItemColl = eventList.GetItems(CamlQuery.CreateAllFoldersQuery());
-                this.clientContext.Load(listItemColl);
+                Folder ifuEventFolder = this.site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + templateNo);
+                this.clientContext.Load(ifuEventFolder, liaf => liaf.ListItemAllFields);
                 this.clientContext.ExecuteQuery();
-                ListItem ifuEvent = null;
-
-                foreach (ListItem li in listItemColl) {
-                    if (li["Title"].ToString() == eventNo) {
-                        ifuEvent = li;
-                        break;
-                    }
-                }
+                var ifuEvent = ifuEventFolder.ListItemAllFields;
 
                 if (ifuEvent != null) {
 
@@ -264,40 +257,22 @@ namespace SharePointConnect
             } catch (Exception ex) {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
-                logger.Debug("EventNo: " + eventNo + "Listname: " + this.listName);
+                logger.Debug("EventNo: " + templateNo + "Listname: " + this.listName);
             }
         }
 
-        public void UpdateIFUTown(string folderName, string eventNo, string town, string startDate, string timeFrom, string timeTo, string contactNo) {
+        public void UpdateIFUTown(string templateNo, string eventNo, string town, string startDate, string timeFrom, string timeTo, string contactNo) {
             try {
 
                 List eventList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = eventList.RootFolder;
-                this.clientContext.Load(rootFolder);
+                this.clientContext.Load(rootFolder, sru => sru.ServerRelativeUrl);
                 this.clientContext.ExecuteQuery();
 
-                CamlQuery camlQuery = new CamlQuery();
-                camlQuery.ViewXml = "<View Scope=\"RecursiveAll\"> " +
-                                        "<Query>" +
-                                            "<Where>" +
-                                                "<Eq>" +
-                                                    "<FieldRef Name=\"FileDirRef\" />" +
-                                                    "<Value Type=\"Text\">" + rootFolder.ServerRelativeUrl + "/" + eventNo + "</Value>" +
-                                                "</Eq>" +
-                                            "</Where>" +
-                                        "</Query>" +
-                                    "</View>";
-                ListItemCollection listItemColl = eventList.GetItems(camlQuery);
-                this.clientContext.Load(listItemColl);
+                Folder ifuTownFolder = this.site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + templateNo + "/" + eventNo);
+                this.clientContext.Load(ifuTownFolder, liaf => liaf.ListItemAllFields);
                 this.clientContext.ExecuteQuery();
-                ListItem ifuTown = null;
-
-                foreach (ListItem li in listItemColl) {
-                    if (li["Title"].ToString() == folderName) {
-                        ifuTown = li;
-                        break;
-                    }
-                }
+                var ifuTown = ifuTownFolder.ListItemAllFields;
 
                 if (ifuTown != null) {
 
@@ -320,7 +295,7 @@ namespace SharePointConnect
             } catch (Exception ex) {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
-                logger.Debug("folderName: " + folderName + "Listname: " + this.listName);
+                logger.Debug("folderName: " + templateNo + "Listname: " + this.listName);
             }
         }
 
@@ -333,7 +308,7 @@ namespace SharePointConnect
                 this.clientContext.ExecuteQuery();
 
                 Folder ifuContactFolder = site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + contactNo);
-                clientContext.Load(ifuContactFolder);
+                clientContext.Load(ifuContactFolder, liaf => liaf.ListItemAllFields);
                 clientContext.ExecuteQuery();
 
                 var ifuContact = ifuContactFolder.ListItemAllFields;

@@ -332,30 +332,11 @@ namespace SharePointConnect
                 this.clientContext.Load(rootFolder);
                 this.clientContext.ExecuteQuery();
 
-                CamlQuery query = new CamlQuery() {
-                    ViewXml = "<View Scope=\"RecursiveAll\"> " +
-                                        "<Query>" +
-                                            "<Where>" +
-                                                "<Eq>" +
-                                                    "<FieldRef Name=\"FileDirRef\" />" +
-                                                    "<Value Type=\"Text\">" + rootFolder.ServerRelativeUrl + "/" + contactNo + "</Value>" +
-                                                "</Eq>" +
-                                            "</Where>" +
-                                        "</Query>" +
-                                    "</View>"
-                };
+                Folder ifuContactFolder = site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + contactNo);
+                clientContext.Load(ifuContactFolder);
+                clientContext.ExecuteQuery();
 
-                ListItemCollection listItemColl = contactList.GetItems(query);
-                this.clientContext.Load(listItemColl);
-                this.clientContext.ExecuteQuery();
-                ListItem ifuContact = null;
-
-                foreach (ListItem li in listItemColl) {
-                    if (li["Title"].ToString() == contactNo) {
-                        ifuContact = li;
-                        break;
-                    }
-                }
+                var ifuContact = ifuContactFolder.ListItemAllFields;
 
                 if (ifuContact != null) {
 

@@ -478,8 +478,11 @@ namespace SharePointConnect
                 Microsoft.SharePoint.Client.File file;
                 string fileServerRelativePath = String.Empty;
                 string itemID = String.Empty;
-                int year = (int.Parse(businessYear)) + 1;
-                businessYear = businessYear + "/" + year;
+                int year;
+                if (businessYear.Length > 0) {
+                    year = (int.Parse(businessYear)) + 1;
+                    businessYear = businessYear + "/" + year;
+                }
 
                 List documentList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = documentList.RootFolder;

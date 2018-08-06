@@ -347,8 +347,9 @@ namespace SharePointConnect
                         WssId = -1
                     };
 
-                    txField.SetFieldValueByValue(item, termValue);
+                    txField.SetFieldValueByValue(item, termValue);                   
                     item.Update();
+
                     this.clientContext.Load(item);
                     this.clientContext.ExecuteQuery();
                 }
@@ -523,7 +524,7 @@ namespace SharePointConnect
                         ContentType contentType = documentList.ContentTypes.Where(ct => ct.Name == "Dokument").First();
 
                         var uploadedFile = rootFolder.Files.Add(fileCreation);
-                        
+                        uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
 
                         this.clientContext.ExecuteQuery();
 

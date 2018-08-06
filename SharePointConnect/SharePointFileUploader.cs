@@ -364,7 +364,7 @@ namespace SharePointConnect
 
         // Diese Funktion versucht für ein Event den DocumentType zu setzen. Der Funktion wird der Documenttype übergeben,
         // sowie die ItemID von der Datei, der Name der Datei, die Veranstaltungsnummer und die Nummer der Stadt.
-        private void UpdateDocumentTypeEvent(string documentType, string itemID, string fileName, string eventNo, string ifuTown) {
+        private void UpdateDocumentTypeEvent(string documentType, string itemID, string fileName, string templateNo, string ifuTown) {
             try {
                 List list = this.site.Lists.GetByTitle(this.listName);
                 FieldCollection fields = list.Fields;
@@ -379,7 +379,7 @@ namespace SharePointConnect
 
                 this.clientContext.Load(list.RootFolder);
                 this.clientContext.ExecuteQuery(); 
-                Microsoft.SharePoint.Client.File file = this.site.GetFileByServerRelativeUrl(list.RootFolder.ServerRelativeUrl + "/" + eventNo + "/" + ifuTown + "/" + fileName);
+                Microsoft.SharePoint.Client.File file = this.site.GetFileByServerRelativeUrl(list.RootFolder.ServerRelativeUrl + "/" + templateNo + "/" + ifuTown + "/" + fileName);
                 ListItem item = file.ListItemAllFields;
                 this.clientContext.Load(item);
                 this.clientContext.ExecuteQuery();
@@ -479,9 +479,9 @@ namespace SharePointConnect
                 Microsoft.SharePoint.Client.File file;
                 string fileServerRelativePath = String.Empty;
                 string itemID = String.Empty;
-                int year;
+
                 if (businessYear.Length > 0) {
-                    year = (int.Parse(businessYear)) + 1;
+                    int year = (int.Parse(businessYear)) + 1;
                     businessYear = businessYear + "/" + year;
                 }
 
@@ -524,7 +524,7 @@ namespace SharePointConnect
                         ContentType contentType = documentList.ContentTypes.Where(ct => ct.Name == "Dokument").First();
 
                         var uploadedFile = rootFolder.Files.Add(fileCreation);
-                        uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
+                        //uploadedFile.CheckIn("", CheckinType.MajorCheckIn);
 
                         this.clientContext.ExecuteQuery();
 

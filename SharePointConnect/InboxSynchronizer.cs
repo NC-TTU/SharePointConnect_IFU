@@ -47,7 +47,7 @@ namespace SharePointConnect
                 clientContext.ExecuteQuery();
 
                 foreach(ListItem li in itemColl) {
-                    clientContext.Load(li, fv => fv.FieldValues);
+                    clientContext.Load(li);
                     clientContext.ExecuteQuery();
 
                     invoiceList.Add(new Invoice(li.FieldValues));
@@ -86,7 +86,7 @@ namespace SharePointConnect
 
                 ListItem item = null;
                 foreach (ListItem li in itemColl) {
-                    clientContext.Load(li, fv => fv.FieldValues);
+                    clientContext.Load(li);
                     clientContext.ExecuteQuery();
                     if (li.FieldValues["IFUInvoiceBarcode"] != null) {
                         if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
@@ -145,7 +145,7 @@ namespace SharePointConnect
 
                 ListItem item = null;
                 foreach (ListItem li in itemColl) {
-                    clientContext.Load(li, fv => fv.FieldValues);
+                    clientContext.Load(li);
                     clientContext.ExecuteQuery();
                     if (li.FieldValues["IFUInvoiceBarcode"] != null) {
                         if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {

@@ -27,18 +27,24 @@ namespace SharePointConnect
             this.amount = 0.0m;
             this.barcode = String.Empty;
 
-            foreach(KeyValuePair<string,object> pair in invoice) {
-                if(pair.Key == "PLACEHOLDERVENDORNO") { // TODO
-                    this.vendorNo = pair.Value.ToString();
-                }
-                if (pair.Key == "IFUInvoiceInvoiceNumber") {
-                    this.externalDocNo = pair.Value.ToString();
-                }
-                if (pair.Key == "IFUInvoiceTotal") {
-                    this.amount = (decimal)pair.Value;
-                }
-                if(pair.Key == "IFUInvoiceBarcode") {
-                    this.barcode = pair.Value.ToString();
+            foreach(KeyValuePair<string, object> pair in invoice) {
+                if (pair.Value != null) {
+                    switch (pair.Key) {
+                        case "PLACEHOLDERVENDORNO": // TODO
+                            this.vendorNo = pair.Value.ToString();
+                            break;
+
+                        case "IFUInvoiceInvoiceNumber":
+                            this.externalDocNo = pair.Value.ToString();
+                            break;
+
+                        case "IFUInvoiceTotal":
+                            this.amount = Decimal.Parse(pair.Value.ToString());
+                            break;
+                        case "IFUInvoiceBarcode":
+                            this.barcode = pair.Value.ToString();
+                            break;
+                    }
                 }
             }
         }

@@ -56,6 +56,7 @@ namespace SharePointConnect
 
             return invoiceList;
         }
+
         static public void ChangeInvoiceStatusToInvoiced(string baseUrl, string subWebsite, string user, string password, string listName, string barcode) {
             string[] parts = user.Split('\\');
 

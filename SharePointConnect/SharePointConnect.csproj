@@ -115,6 +115,7 @@
     <Compile Include="Fee.cs" />
     <Compile Include="FeeAttachment.cs" />
     <Compile Include="FolderCreator.cs" />
+    <Compile Include="Invoice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registration.cs" />
     <Compile Include="InboxSynchronizer.cs" />

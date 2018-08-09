@@ -117,7 +117,41 @@ namespace SharePointConnect
 
         // CreateIFUEvent erstellt ein DocumentSet mit der Veranstaltungsnummer als Namen
         // direkt unter dem Rootfolder der Liste.
-        public void CreateIFUEvent(string eventNo) {
+        public void CreateIFUEvent(string eventTemplateNo) {
+            try {
+
+                List eventList = this.site.Lists.GetByTitle(this.listName);
+                Folder rootFolder = eventList.RootFolder;
+                this.clientContext.Load(rootFolder);
+                this.clientContext.ExecuteQuery();
+
+                ListItemCreationInformation listItem = new ListItemCreationInformation();
+                listItem.UnderlyingObjectType = FileSystemObjectType.Folder;
+                listItem.LeafName = eventTemplateNo;
+                listItem.FolderUrl = rootFolder.ServerRelativeUrl;
+
+                this.clientContext.Load(eventList.ContentTypes);
+                this.clientContext.ExecuteQuery();
+                ContentType contentType = eventList.ContentTypes.Where(ct => ct.Name == "Veranstaltung").First();
+
+                var ifuEvent = eventList.AddItem(listItem);
+                ifuEvent["ContentTypeId"] = contentType.Id;
+                ifuEvent["HTML_x0020_File_x0020_Type"] = "SharePoint.DocumentSet";
+                ifuEvent["Title"] = eventTemplateNo;
+                ifuEvent.Update();
+
+                this.clientContext.ExecuteQuery();
+
+            } catch (Exception ex) {
+                logger.Error(ex.Message);
+                logger.Debug(ex.StackTrace);
+                logger.Debug("EventNo: " + eventTemplateNo + "Listname: " + this.listName);
+            }
+        }
+
+        // CreateIFUTown erstellt einen Ordner in der Liste mit dem Content Type 
+        // Stadt.
+        public void CreateIFUTown(string eventNo, string eventTemplateNo) {
             try {
 
                 List eventList = this.site.Lists.GetByTitle(this.listName);
@@ -128,41 +162,7 @@ namespace SharePointConnect
                 ListItemCreationInformation listItem = new ListItemCreationInformation();
                 listItem.UnderlyingObjectType = FileSystemObjectType.Folder;
                 listItem.LeafName = eventNo;
-                listItem.FolderUrl = rootFolder.ServerRelativeUrl;
-
-                this.clientContext.Load(eventList.ContentTypes);
-                this.clientContext.ExecuteQuery();
-                ContentType contentType = eventList.ContentTypes.Where(ct => ct.Name == "Veranstaltung").First();
-
-                var ifuEvent = eventList.AddItem(listItem);
-                ifuEvent["ContentTypeId"] = contentType.Id;
-                ifuEvent["HTML_x0020_File_x0020_Type"] = "SharePoint.DocumentSet";
-                ifuEvent["Title"] = eventNo;
-                ifuEvent.Update();
-
-                this.clientContext.ExecuteQuery();
-
-            } catch (Exception ex) {
-                logger.Error(ex.Message);
-                logger.Debug(ex.StackTrace);
-                logger.Debug("EventNo: " + eventNo + "Listname: " + this.listName);
-            }
-        }
-
-        // CreateIFUTown erstellt einen Ordner in der Liste mit dem Content Type 
-        // Stadt.
-        public void CreateIFUTown(string folderName, string eventNo) {
-            try {
-
-                List eventList = this.site.Lists.GetByTitle(this.listName);
-                Folder rootFolder = eventList.RootFolder;
-                this.clientContext.Load(rootFolder);
-                this.clientContext.ExecuteQuery();
-
-                ListItemCreationInformation listItem = new ListItemCreationInformation();
-                listItem.UnderlyingObjectType = FileSystemObjectType.Folder;
-                listItem.LeafName = folderName;
-                listItem.FolderUrl = rootFolder.ServerRelativeUrl + "/" + eventNo;
+                listItem.FolderUrl = rootFolder.ServerRelativeUrl + "/" + eventTemplateNo;
 
                 this.clientContext.Load(eventList.ContentTypes);
                 this.clientContext.ExecuteQuery();
@@ -171,7 +171,7 @@ namespace SharePointConnect
                 var ifuTown = eventList.AddItem(listItem);
                 ifuTown["ContentTypeId"] = contentType.Id;
                 ifuTown["HTML_x0020_File_x0020_Type"] = "SharePoint.Folder";
-                ifuTown["Title"] = folderName;
+                ifuTown["Title"] = eventNo;
                 ifuTown.Update();
 
                 this.clientContext.ExecuteQuery();
@@ -179,7 +179,7 @@ namespace SharePointConnect
             } catch (Exception ex) {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
-                logger.Debug("folderName: " + folderName + "EventNo: " + eventNo + "Listname: " + this.listName);
+                logger.Debug("folderName: " + eventNo + "EventNo: " + eventTemplateNo + "Listname: " + this.listName);
             }
         }
 

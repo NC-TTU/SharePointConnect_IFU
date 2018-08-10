@@ -13,12 +13,14 @@ namespace SharePointConnect
         readonly string externalDocNo;
         readonly decimal amount;
         readonly string barcode;
+        readonly DateTime dueDate;
 
-        public Invoice(string vendorNo, string externalDocNo, decimal amount, string barcode) {
+        public Invoice(string vendorNo, string externalDocNo, decimal amount, string barcode, DateTime dueDate) {
             this.vendorNo = vendorNo;
             this.externalDocNo = externalDocNo;
             this.amount = amount;
             this.barcode = barcode;
+            this.dueDate = dueDate;
         }
 
         public Invoice(Dictionary<string,object> invoice) {
@@ -26,6 +28,7 @@ namespace SharePointConnect
             this.externalDocNo = String.Empty;
             this.amount = 0.0m;
             this.barcode = String.Empty;
+            this.dueDate = default(DateTime);
 
             foreach(KeyValuePair<string, object> pair in invoice) {
                 if (pair.Value != null) {
@@ -33,16 +36,17 @@ namespace SharePointConnect
                         case "PLACEHOLDERVENDORNO": // TODO
                             this.vendorNo = pair.Value.ToString();
                             break;
-
                         case "IFUInvoiceInvoiceNumber":
                             this.externalDocNo = pair.Value.ToString();
                             break;
-
                         case "IFUInvoiceTotal":
                             this.amount = Decimal.Parse(pair.Value.ToString());
                             break;
                         case "IFUInvoiceBarcode":
                             this.barcode = pair.Value.ToString();
+                            break;
+                        case "PLACEHOLDERDUEDATE":
+                            this.dueDate = DateTime.Parse(pair.Value.ToString());
                             break;
                     }
                 }

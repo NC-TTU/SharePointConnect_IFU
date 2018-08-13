@@ -391,8 +391,8 @@ namespace SharePointConnect
             this.clientContext.ExecuteQuery();
 
             Folder target = this.site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + folderName);
-            this.clientContext.Load(target);
-            this.clientContext.ExecuteQuery();
+           /* this.clientContext.Load(target);
+            this.clientContext.ExecuteQuery();*/
 
             if (target == null) {
                 return false;

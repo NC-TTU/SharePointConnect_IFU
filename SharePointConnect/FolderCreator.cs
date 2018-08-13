@@ -387,18 +387,19 @@ namespace SharePointConnect
 
             List list = this.site.Lists.GetByTitle(this.listName);
             Folder rootFolder = list.RootFolder;
-            this.clientContext.Load(rootFolder);
+            this.clientContext.Load(rootFolder, sru => sru.ServerRelativeUrl);
             this.clientContext.ExecuteQuery();
 
-            FolderCollection folderColl = rootFolder.Folders;
-            this.clientContext.Load(folderColl);
+            Folder target = this.site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + folderName);
+            this.clientContext.Load(target);
             this.clientContext.ExecuteQuery();
 
-            foreach (Folder f in folderColl) {
-                if (f.Name == folderName)
-                    return true;
+            if (target == null) {
+                return false;
+            } else {
+                return true;
             }
-            return false;
+            
         }
 
         public void GetConnection(string baseUrl, string subWebsite, string user, string password, string subPage, string listName) {

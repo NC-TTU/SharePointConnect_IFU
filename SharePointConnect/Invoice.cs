@@ -57,6 +57,7 @@ namespace SharePointConnect
         public string GetExternalDocNo() { return this.externalDocNo; }
         public decimal GetAmount() { return this.amount; }
         public string GetBarcode() { return this.barcode; }
+        public DateTime GetDueDate() { return this.dueDate; }
 
     }
 }

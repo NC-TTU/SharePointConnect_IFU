@@ -68,15 +68,15 @@ namespace SharePointConnect
                 List list = site.Lists.GetByTitle(listName);
 
                 CamlQuery query = new CamlQuery() {
-                    ViewXml = "<View scope=\"RecursiveAll\">"+
-                                  "<Query>"+
-                                      "<Where>"+
-                                          "<Eq>"+
+                    ViewXml = "<View Scope=\"RecursiveAll\">" +
+                                  "<Query>" +
+                                      "<Where>" +
+                                          "<Eq>" +
                                               "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
-                                              "<Value Type=\"Text\">" + "Frei zur Zahlung" + "<Value/>"+
-                                          "</Eq>"+
-                                      "</Where>"+
-                                 "</Query>"+
+                                              "<Value Type=\"Text\">" + "Frei zur Zahlung" + "</Value>" +
+                                          "</Eq>" +
+                                     "</Where>" +
+                                 "</Query>" +
                              "</View>"
                 };
 
@@ -96,7 +96,7 @@ namespace SharePointConnect
                     }
                 }
 
-                if(item != null) {
+                if (item != null) {
                     clientContext.Load(item);
                     clientContext.ExecuteQuery();
 
@@ -104,6 +104,7 @@ namespace SharePointConnect
                     item.Update();
 
                     clientContext.ExecuteQuery();
+
                 } else {
                     logger.Debug("Es wurde keine Rechnung gefunden!");
                     logger.Debug("Baseurl: " + baseUrl);

@@ -131,7 +131,7 @@ namespace SharePointConnect
                                   "<Query>" +
                                       "<Where>" +
                                           "<Eq>" +
-                                              "<FieldRef Name=\"IFUInvoiceStatus\" />" +
+                                              "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
                                               "<Value Type=\"Text\">" + "Fakturiert" + "</Value>" +
                                           "</Eq>" +
                                       "</Where>" +

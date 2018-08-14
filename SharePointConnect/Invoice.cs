@@ -33,7 +33,7 @@ namespace SharePointConnect
             foreach(KeyValuePair<string, object> pair in invoice) {
                 if (pair.Value != null) {
                     switch (pair.Key) {
-                        case "PLACEHOLDERVENDORNO": // TODO
+                        case "IFUInvoiceSupplierNr": 
                             this.vendorNo = pair.Value.ToString();
                             break;
                         case "IFUInvoiceInvoiceNumber":
@@ -45,7 +45,7 @@ namespace SharePointConnect
                         case "IFUInvoiceBarcode":
                             this.barcode = pair.Value.ToString();
                             break;
-                        case "PLACEHOLDERDUEDATE":
+                        case "IFUInvoiceDueDate":
                             this.dueDate = DateTime.Parse(pair.Value.ToString());
                             break;
                     }

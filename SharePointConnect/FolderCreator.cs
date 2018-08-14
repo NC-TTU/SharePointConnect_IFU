@@ -391,15 +391,17 @@ namespace SharePointConnect
             this.clientContext.ExecuteQuery();
 
             Folder target = this.site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + folderName);
-           /* this.clientContext.Load(target);
-            this.clientContext.ExecuteQuery();*/
-
-            if (target == null) {
-                return false;
-            } else {
+            try {
+                this.clientContext.Load(target);
+                this.clientContext.ExecuteQuery();
                 return true;
+            } catch (ServerException sex) {
+                if (sex.ServerErrorTypeName == "System.IO.FileNotFoundException") {
+                    target = null;
+                    return false;
+                }
+                throw;
             }
-            
         }
 
         public void GetConnection(string baseUrl, string subWebsite, string user, string password, string subPage, string listName) {

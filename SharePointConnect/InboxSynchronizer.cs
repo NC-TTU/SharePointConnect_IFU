@@ -164,14 +164,6 @@ namespace SharePointConnect
                     item.Update();
 
                     clientContext.ExecuteQuery();
-                } else {
-                    logger.Debug("Es wurde keine Rechnung gefunden!");
-                    logger.Debug("Baseurl: " + baseUrl);
-                    logger.Debug("Subwebsite: " + subWebsite);
-                    logger.Debug("Listenmane: " + listName);
-                    logger.Debug("Benutzer: " + user);
-                    logger.Debug("Barcode: " + barcode);
-                    logger.Debug("Elemente in Collection: " + itemColl.Count);
                 }
             }
         }
@@ -239,12 +231,12 @@ namespace SharePointConnect
             }
         }
 
-        static public List<string> SplitContactString(string contacts) {
-            List<string> contactList = new List<string>();
+        static public List<string> SplitString(string stringToBeSeperated, char seperator) {
+            List<string> strings = new List<string>();
 
-            contactList.AddRange(contacts.Split('|'));
+            strings.AddRange(stringToBeSeperated.Split(seperator));
 
-            return contactList;
+            return strings;
         }
 
         static public void UpdateRegistration(string baseUrl, string subWebsite, string user, string password, string listName, Registration registration) {

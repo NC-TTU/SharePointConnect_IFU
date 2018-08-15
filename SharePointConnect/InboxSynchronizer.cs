@@ -11,162 +11,172 @@ using log4net;
 
 namespace SharePointConnect
 {
-    public static class InboxSynchronizer
-    {
+    public static class InboxSynchronizer {
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(InboxSynchronizer));
 
         #region Invoices
 
         static public List<Invoice> GetInvoicesFromSharePoint(string baseUrl, string subWebsite, string user, string password, string listName) {
-            List<Invoice> invoiceList = new List<Invoice>();
-            string[] parts = user.Split('\\');
+            try {
+                List<Invoice> invoiceList = new List<Invoice>();
+                string[] parts = user.Split('\\');
 
-            using(ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
-                clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
+                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+                    clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
-                Web site = clientContext.Web;
+                    Web site = clientContext.Web;
 
-                List list = site.Lists.GetByTitle(listName);
+                    List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
-                    ViewXml = "<View Scope=\"RecursiveAll\">" +
-                                  "<Query>" +
-                                      "<Where>" +
-                                          "<Eq>" +
-                                              "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
-                                              "<Value Type=\"Text\">" + "Frei zur Zahlung" + "</Value>" +
-                                          "</Eq>" +
-                                     "</Where>" +
-                                 "</Query>" +
-                             "</View>"
-                };
+                    CamlQuery query = new CamlQuery() {
+                        ViewXml = "<View Scope=\"RecursiveAll\">" +
+                                      "<Query>" +
+                                          "<Where>" +
+                                              "<Eq>" +
+                                                  "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
+                                                  "<Value Type=\"Text\">" + "Frei zur Zahlung" + "</Value>" +
+                                              "</Eq>" +
+                                         "</Where>" +
+                                     "</Query>" +
+                                 "</View>"
+                    };
 
-                ListItemCollection itemColl = list.GetItems(query);
-                clientContext.Load(itemColl);
-                clientContext.ExecuteQuery();
-
-                foreach(ListItem li in itemColl) {
-                    clientContext.Load(li);
+                    ListItemCollection itemColl = list.GetItems(query);
+                    clientContext.Load(itemColl);
                     clientContext.ExecuteQuery();
 
-                    invoiceList.Add(new Invoice(li.FieldValues));
-                }
-            }
+                    foreach (ListItem li in itemColl) {
+                        clientContext.Load(li);
+                        clientContext.ExecuteQuery();
 
-            return invoiceList;
+                        invoiceList.Add(new Invoice(li.FieldValues));
+                    }
+                }
+                return invoiceList;
+            } catch (Exception ex) {
+                logger.Error(ex.Message);
+                logger.Debug(ex.StackTrace);
+                return new List<Invoice>();
+            }
         }
 
         static public void ChangeInvoiceStatusToInvoiced(string baseUrl, string subWebsite, string user, string password, string listName, string barcode) {
-            string[] parts = user.Split('\\');
+            try {
+                string[] parts = user.Split('\\');
 
-            using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
-                clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
+                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+                    clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
-                Web site = clientContext.Web;
+                    Web site = clientContext.Web;
 
-                List list = site.Lists.GetByTitle(listName);
+                    List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
-                    ViewXml = "<View Scope=\"RecursiveAll\">" +
-                                  "<Query>" +
-                                      "<Where>" +
-                                          "<Eq>" +
-                                              "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
-                                              "<Value Type=\"Text\">" + "Frei zur Zahlung" + "</Value>" +
-                                          "</Eq>" +
-                                     "</Where>" +
-                                 "</Query>" +
-                             "</View>"
-                };
+                    CamlQuery query = new CamlQuery() {
+                        ViewXml = "<View Scope=\"RecursiveAll\">" +
+                                      "<Query>" +
+                                          "<Where>" +
+                                              "<Eq>" +
+                                                  "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
+                                                  "<Value Type=\"Text\">" + "Frei zur Zahlung" + "</Value>" +
+                                              "</Eq>" +
+                                         "</Where>" +
+                                     "</Query>" +
+                                 "</View>"
+                    };
 
-                ListItemCollection itemColl = list.GetItems(query);
-                clientContext.Load(itemColl);
-                clientContext.ExecuteQuery();
-
-                ListItem item = null;
-                foreach (ListItem li in itemColl) {
-                    clientContext.Load(li);
+                    ListItemCollection itemColl = list.GetItems(query);
+                    clientContext.Load(itemColl);
                     clientContext.ExecuteQuery();
-                    if (li.FieldValues["IFUInvoiceBarcode"] != null) {
-                        if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
-                            item = li;
-                            break;
+
+                    ListItem item = null;
+                    foreach (ListItem li in itemColl) {
+                        clientContext.Load(li);
+                        clientContext.ExecuteQuery();
+                        if (li.FieldValues["IFUInvoiceBarcode"] != null) {
+                            if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
+                                item = li;
+                                break;
+                            }
                         }
                     }
+
+                    if (item != null) {
+                        clientContext.Load(item);
+                        clientContext.ExecuteQuery();
+
+                        item["IFUInvoiceStatus"] = "Fakturiert";
+                        item.Update();
+
+                        clientContext.ExecuteQuery();
+                    }
                 }
-
-                if (item != null) {
-                    clientContext.Load(item);
-                    clientContext.ExecuteQuery();
-
-                    item["IFUInvoiceStatus"] = "Fakturiert";
-                    item.Update();
-
-                    clientContext.ExecuteQuery();
-
-                } else {
-                    logger.Debug("Es wurde keine Rechnung gefunden!");
-                    logger.Debug("Baseurl: " + baseUrl);
-                    logger.Debug("Subwebsite: " + subWebsite);
-                    logger.Debug("Listenmane: " + listName);
-                    logger.Debug("Benutzer: " + user);
-                    logger.Debug("Barcode: " + barcode);
-                    logger.Debug("Elemente in Collection: " + itemColl.Count);
-                }
+            } catch (Exception ex) {
+                logger.Error(ex.Message);
+                logger.Debug(ex.StackTrace);
             }
         }
+
+
+
+
 
         static public void ChangeInvoiceStatusToPaid(string baseUrl, string subWebsite, string user, string password, string listName, string barcode) {
-            string[] parts = user.Split('\\');
+            try {
+                string[] parts = user.Split('\\');
 
-            using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
-                clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
+                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+                    clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
-                Web site = clientContext.Web;
+                    Web site = clientContext.Web;
 
-                List list = site.Lists.GetByTitle(listName);
+                    List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
-                    ViewXml = "<View Scope=\"RecursiveAll\"> " +
-                                  "<Query>" +
-                                      "<Where>" +
-                                          "<Eq>" +
-                                              "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
-                                              "<Value Type=\"Text\">" + "Fakturiert" + "</Value>" +
-                                          "</Eq>" +
-                                      "</Where>" +
-                                  "</Query>" +
-                              "</View>"
-                };
+                    CamlQuery query = new CamlQuery() {
+                        ViewXml = "<View Scope=\"RecursiveAll\"> " +
+                                      "<Query>" +
+                                          "<Where>" +
+                                              "<Eq>" +
+                                                  "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
+                                                  "<Value Type=\"Text\">" + "Fakturiert" + "</Value>" +
+                                              "</Eq>" +
+                                          "</Where>" +
+                                      "</Query>" +
+                                  "</View>"
+                    };
 
-                ListItemCollection itemColl = list.GetItems(query);
-                clientContext.Load(itemColl);
-                clientContext.ExecuteQuery();
-
-                ListItem item = null;
-                foreach (ListItem li in itemColl) {
-                    clientContext.Load(li);
+                    ListItemCollection itemColl = list.GetItems(query);
+                    clientContext.Load(itemColl);
                     clientContext.ExecuteQuery();
-                    if (li.FieldValues["IFUInvoiceBarcode"] != null) {
-                        if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
-                            item = li;
-                            break;
+
+                    ListItem item = null;
+                    foreach (ListItem li in itemColl) {
+                        clientContext.Load(li);
+                        clientContext.ExecuteQuery();
+                        if (li.FieldValues["IFUInvoiceBarcode"] != null) {
+                            if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
+                                item = li;
+                                break;
+                            }
                         }
                     }
+
+                    if (item != null) {
+                        clientContext.Load(item);
+                        clientContext.ExecuteQuery();
+
+                        item["IFUInvoiceStatus"] = "Bezahlt";
+                        item.Update();
+
+                        clientContext.ExecuteQuery();
+                    }
                 }
-
-                if (item != null) {
-                    clientContext.Load(item);
-                    clientContext.ExecuteQuery();
-
-                    item["IFUInvoiceStatus"] = "Bezahlt";
-                    item.Update();
-
-                    clientContext.ExecuteQuery();
-                }
+            } catch (Exception ex) {
+                logger.Error(ex.Message);
+                logger.Debug(ex.StackTrace);
             }
         }
+        
         #endregion  
 
 

@@ -400,7 +400,7 @@ namespace SharePointConnect
                     target = null;
                     return false;
                 }
-                throw;
+                return true; // wenn irgendwas anderes schief geht tun wir so als ob der Ordner schon da ist.
             }
         }
 

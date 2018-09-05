@@ -146,6 +146,10 @@ namespace SharePointConnect
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
                 logger.Debug("EventNo: " + eventTemplateNo + "Listname: " + this.listName);
+            } finally {
+                /****Aufräumarbeit****/
+                this.clientContext.Dispose();
+                this.site = null;
             }
         }
 
@@ -180,6 +184,10 @@ namespace SharePointConnect
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
                 logger.Debug("folderName: " + eventNo + "EventNo: " + eventTemplateNo + "Listname: " + this.listName);
+            } finally {
+                /****Aufräumarbeit****/
+                this.clientContext.Dispose();
+                this.site = null;
             }
         }
 
@@ -214,6 +222,10 @@ namespace SharePointConnect
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
                 logger.Debug("ContactNo: " + contactNo + "Listname: " + this.listName);
+            } finally {
+                /****Aufräumarbeit****/
+                this.clientContext.Dispose();
+                this.site = null;
             }
 
         }
@@ -258,6 +270,10 @@ namespace SharePointConnect
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
                 logger.Debug("EventNo: " + templateNo + "Listname: " + this.listName);
+            } finally {
+                /****Aufräumarbeit****/
+                this.clientContext.Dispose();
+                this.site = null;
             }
         }
 
@@ -296,8 +312,62 @@ namespace SharePointConnect
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
                 logger.Debug("folderName: " + templateNo + "Listname: " + this.listName);
+            } finally {
+                /****Aufräumarbeit****/
+                this.clientContext.Dispose();
+                this.site = null;
             }
         }
+
+        // Eine Funktion, die überprüft ob die Eigenschaften eines Kontakts überprüft und true zurückgibt,
+        // falls eine der Eigentschaften keinen Wert hat.
+        public bool CheckProperties(string contactNo, bool isPerson) {
+            try {
+                List contactList = this.site.Lists.GetByTitle(this.listName);
+                Folder rootFolder = contactList.RootFolder;
+                this.clientContext.Load(rootFolder);
+                this.clientContext.ExecuteQuery();
+
+                Folder ifuContactFolder = site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + contactNo);
+                clientContext.Load(ifuContactFolder, liaf => liaf.ListItemAllFields);
+                clientContext.ExecuteQuery();
+
+                var ifuContact = ifuContactFolder.ListItemAllFields;
+
+                if (ifuContact != null) {
+
+                    if (isPerson) {
+                        if (String.IsNullOrEmpty(ifuContact.FieldValues["IFUFirm"].ToString())) {
+                            return true;
+                        }
+                        if (String.IsNullOrEmpty(ifuContact.FieldValues["IFUFirstname"].ToString())) {
+                            return true;
+                        }
+                        if (String.IsNullOrEmpty(ifuContact.FieldValues["IFUSurname"].ToString())) {
+                            return true;
+                        }
+                        
+                    } else {
+                        if (String.IsNullOrEmpty(ifuContact.FieldValues["IFUFirm"].ToString())) {
+                            return true;
+                        }
+                    }                   
+                    return false; // Wenn keine der Properties von oben null oder Leer ist wird ein false zurückgegeben
+                } else {
+                    throw new ArgumentNullException("IFU Contact is null");
+                }
+            } catch (Exception ex) {
+                logger.Error(ex.Message);
+                logger.Debug(ex.StackTrace);
+                logger.Debug("ContactNo: " + contactNo + "Listname: " + this.listName);
+                return false;
+            } finally {
+                /****Aufräumarbeit****/
+                this.clientContext.Dispose();
+                this.site = null;
+            }
+        }
+
 
         public void UpdateIFUContact(string contactNo, string company, string firstname, string surname, bool referee, string title) {
             try {
@@ -317,7 +387,7 @@ namespace SharePointConnect
 
                     this.clientContext.Load(ifuContact);
                     this.clientContext.ExecuteQuery();
-
+                    
                     ifuContact.ParseAndSetFieldValue("IFUFirm", company);
                     ifuContact.ParseAndSetFieldValue("IFUFirstname", firstname);
                     ifuContact.ParseAndSetFieldValue("IFUSurname", surname);
@@ -335,7 +405,11 @@ namespace SharePointConnect
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
                 logger.Debug("ContactNo: " + contactNo + "Listname: " + this.listName);
-            }
+                } finally {
+                    /****Aufräumarbeit****/
+                    this.clientContext.Dispose();
+                    this.site = null;
+                }
         }
 
         public void RenameRootFolder(string oldName, string newName) {
@@ -366,6 +440,10 @@ namespace SharePointConnect
                     logger.Error(ex.Message);
                     logger.Debug("RelativeUrl: " + this.listUrl + "/" + oldName + " Oldname:" + oldName + " newName: " + newName);
                     return;
+                } finally {
+                    /****Aufräumarbeit****/
+                    this.clientContext.Dispose();
+                    this.site = null;
                 }
 
                 this.clientContext.Load(rootFolder);
@@ -378,9 +456,6 @@ namespace SharePointConnect
                 this.clientContext.ExecuteQuery();
 
             }
-            /****Aufräumarbeit****/
-            this.clientContext.Dispose();
-            this.site = null;
         }
 
         public bool CheckIfFolderAlreadyExists(string folderName) {
@@ -401,6 +476,10 @@ namespace SharePointConnect
                     return false;
                 }
                 return true; // wenn irgendwas anderes schief geht tun wir so als ob der Ordner schon da ist.
+            } finally {
+                /****Aufräumarbeit****/
+                this.clientContext.Dispose();
+                this.site = null;
             }
         }
 

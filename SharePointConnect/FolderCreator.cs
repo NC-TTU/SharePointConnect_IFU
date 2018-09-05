@@ -337,21 +337,21 @@ namespace SharePointConnect
                 if (ifuContact != null) {
 
                     if (isPerson) {
-                        if (String.IsNullOrEmpty(ifuContact.FieldValues["IFUFirm"].ToString())) {
+                        if (ifuContact.FieldValues["IFUFirm"] == null || String.IsNullOrEmpty(ifuContact.FieldValues["IFUFirm"].ToString())) {
                             return true;
                         }
-                        if (String.IsNullOrEmpty(ifuContact.FieldValues["IFUFirstname"].ToString())) {
+                        if (ifuContact.FieldValues["IFUFirstname"] == null || String.IsNullOrEmpty(ifuContact.FieldValues["IFUFirstname"].ToString())) {
                             return true;
                         }
-                        if (String.IsNullOrEmpty(ifuContact.FieldValues["IFUSurname"].ToString())) {
+                        if (ifuContact.FieldValues["IFUSurname"] == null || String.IsNullOrEmpty(ifuContact.FieldValues["IFUSurname"].ToString())) {
                             return true;
                         }
-                        
+
                     } else {
-                        if (String.IsNullOrEmpty(ifuContact.FieldValues["IFUFirm"].ToString())) {
+                        if (ifuContact.FieldValues["IFUFirm"] == null || String.IsNullOrEmpty(ifuContact.FieldValues["IFUFirm"].ToString())) {
                             return true;
                         }
-                    }                   
+                    }
                     return false; // Wenn keine der Properties von oben null oder Leer ist wird ein false zurückgegeben
                 } else {
                     throw new ArgumentNullException("IFU Contact is null");
@@ -361,10 +361,6 @@ namespace SharePointConnect
                 logger.Debug(ex.StackTrace);
                 logger.Debug("ContactNo: " + contactNo + "Listname: " + this.listName);
                 return false;
-            } finally {
-                /****Aufräumarbeit****/
-                this.clientContext.Dispose();
-                this.site = null;
             }
         }
 
@@ -476,10 +472,6 @@ namespace SharePointConnect
                     return false;
                 }
                 return true; // wenn irgendwas anderes schief geht tun wir so als ob der Ordner schon da ist.
-            } finally {
-                /****Aufräumarbeit****/
-                this.clientContext.Dispose();
-                this.site = null;
             }
         }
 

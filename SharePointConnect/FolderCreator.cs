@@ -21,8 +21,7 @@ using log4net;
 namespace SharePointConnect
 {
 
-    public class FolderCreator
-    {
+    public class FolderCreator {
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(FolderCreator));
 
@@ -31,7 +30,14 @@ namespace SharePointConnect
         private Web site;
         private string rootName;
         private string listUrl;
+        private string baseUrl;
+        private string subWebsite;
+        private string user;
+        private string password;
+        private string subPage;
         private string listName;
+
+
 
         /**************Konstruktoren*************/
 
@@ -65,6 +71,9 @@ namespace SharePointConnect
 
 
         public void CreateFoldersInSharePoint() {
+            if (!HasConnection()) {
+                GetConnection();
+            }
             Folder parentFolder = null;
             List list = site.Lists.GetByTitle(this.listName);
             this.clientContext.Load(list);
@@ -119,7 +128,9 @@ namespace SharePointConnect
         // direkt unter dem Rootfolder der Liste.
         public void CreateIFUEvent(string eventTemplateNo) {
             try {
-
+                if (!HasConnection()) {
+                    GetConnection();
+                }
                 List eventList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = eventList.RootFolder;
                 this.clientContext.Load(rootFolder);
@@ -157,7 +168,9 @@ namespace SharePointConnect
         // Stadt.
         public void CreateIFUTown(string eventNo, string eventTemplateNo) {
             try {
-
+                if (!HasConnection()) {
+                    GetConnection();
+                }
                 List eventList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = eventList.RootFolder;
                 this.clientContext.Load(rootFolder);
@@ -195,7 +208,9 @@ namespace SharePointConnect
         // Content Type IFU Kontakt.
         public void CreateIFUContact(string contactNo) {
             try {
-
+                if (!HasConnection()) {
+                    GetConnection();
+                }
                 List contactList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = contactList.RootFolder;
                 clientContext.Load(rootFolder, sru => sru.ServerRelativeUrl);
@@ -234,7 +249,9 @@ namespace SharePointConnect
         // in der Liste auf die übergebenen Stringwerte;
         public void UpdateIFUEvent(string templateNo, string description, string eventInfo, string startDate) {
             try {
-
+                if (!HasConnection()) {
+                    GetConnection();
+                }
                 List eventList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = eventList.RootFolder;
                 this.clientContext.Load(rootFolder, sru => sru.ServerRelativeUrl);
@@ -279,7 +296,9 @@ namespace SharePointConnect
 
         public void UpdateIFUTown(string templateNo, string eventNo, string town, string startDate, string timeFrom, string timeTo, string contactNo) {
             try {
-
+                if (!HasConnection()) {
+                    GetConnection();
+                }
                 List eventList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = eventList.RootFolder;
                 this.clientContext.Load(rootFolder, sru => sru.ServerRelativeUrl);
@@ -323,6 +342,9 @@ namespace SharePointConnect
         // falls eine der Eigentschaften keinen Wert hat.
         public bool CheckProperties(string contactNo, bool isPerson) {
             try {
+                if (!HasConnection()) {
+                    GetConnection();
+                }
                 List contactList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = contactList.RootFolder;
                 this.clientContext.Load(rootFolder);
@@ -367,7 +389,9 @@ namespace SharePointConnect
 
         public void UpdateIFUContact(string contactNo, string company, string firstname, string surname, bool referee, string title) {
             try {
-
+                if (!HasConnection()) {
+                    GetConnection();
+                }
                 List contactList = this.site.Lists.GetByTitle(this.listName);
                 Folder rootFolder = contactList.RootFolder;
                 this.clientContext.Load(rootFolder);
@@ -383,7 +407,7 @@ namespace SharePointConnect
 
                     this.clientContext.Load(ifuContact);
                     this.clientContext.ExecuteQuery();
-                    
+
                     ifuContact.ParseAndSetFieldValue("IFUFirm", company);
                     ifuContact.ParseAndSetFieldValue("IFUFirstname", firstname);
                     ifuContact.ParseAndSetFieldValue("IFUSurname", surname);
@@ -401,14 +425,17 @@ namespace SharePointConnect
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
                 logger.Debug("ContactNo: " + contactNo + "Listname: " + this.listName);
-                } finally {
-                    /****Aufräumarbeit****/
-                    this.clientContext.Dispose();
-                    this.site = null;
-                }
+            } finally {
+                /****Aufräumarbeit****/
+                this.clientContext.Dispose();
+                this.site = null;
+            }
         }
 
         public void RenameRootFolder(string oldName, string newName) {
+            if (!HasConnection()) {
+                GetConnection();
+            }
             Folder rootFolder = null;
             if (oldName != newName) {
 
@@ -455,7 +482,9 @@ namespace SharePointConnect
         }
 
         public bool CheckIfFolderAlreadyExists(string folderName) {
-
+            if (!HasConnection()) {
+                GetConnection();
+            }
             List list = this.site.Lists.GetByTitle(this.listName);
             Folder rootFolder = list.RootFolder;
             this.clientContext.Load(rootFolder, sru => sru.ServerRelativeUrl);
@@ -471,18 +500,24 @@ namespace SharePointConnect
                     target = null;
                     return false;
                 }
+                logger.Error(sex.Message);
+                logger.Debug(sex.StackTrace);
                 return true; // wenn irgendwas anderes schief geht tun wir so als ob der Ordner schon da ist.
             }
         }
 
         public void GetConnection(string baseUrl, string subWebsite, string user, string password, string subPage, string listName) {
-
+    
             if (String.IsNullOrEmpty(subPage)) {
                 this.listUrl = baseUrl + subWebsite + "/" + listName;
             } else {
                 this.listUrl = baseUrl + subWebsite + subPage + "/" + listName;
             }
-
+            this.baseUrl = baseUrl;
+            this.subWebsite = subWebsite;
+            this.user = user;
+            this.password = password;
+            this.subPage = subPage;
             this.listName = listName;
 
             try {
@@ -492,6 +527,18 @@ namespace SharePointConnect
             } catch (Exception ex) {
                 logger.Error(ex.Message);
                 logger.Debug("Url: " + baseUrl + subWebsite + " SubPage: " + subPage + " User: " + user);
+            }
+        }
+
+        private void GetConnection(){
+            GetConnection(this.baseUrl, this.subWebsite, this.user, this.password, this.subPage, this.listName);
+        }
+
+        private bool HasConnection() {
+            if (this.clientContext == null || this.site == null) {
+                return false;
+            } else {
+                return true;
             }
         }
 

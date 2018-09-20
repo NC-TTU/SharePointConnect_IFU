@@ -338,6 +338,39 @@ namespace SharePointConnect
             }
         }
 
+        // Eine Funktion, die überprüft ob die Eigenschaften einer Veranstaltung überprüft und true zurückgibt,
+        // falls eine der Eigenschaften keinen Wert hat.
+        public bool CheckProperties(string templateNo, string eventNo) {
+
+            List eventList = this.site.Lists.GetByTitle(this.listName);
+            Folder rootFolder = eventList.RootFolder;
+            this.clientContext.Load(rootFolder, sru => sru.ServerRelativeUrl);
+            this.clientContext.ExecuteQuery();
+
+            Folder ifuEventFolder = this.site.GetFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/" + templateNo);
+            this.clientContext.Load(ifuEventFolder, liaf => liaf.ListItemAllFields);
+            this.clientContext.ExecuteQuery();
+            var ifuEvent = ifuEventFolder.ListItemAllFields;
+
+            if (ifuEvent != null) {
+
+                this.clientContext.Load(ifuEvent);
+                this.clientContext.ExecuteQuery();
+                if (ifuEvent.FieldValues["DocumentSetDescription"] == null || String.IsNullOrEmpty(ifuEvent.FieldValues["DocumentSetDescription"].ToString())) {
+                    return true;
+                }
+                if (ifuEvent.FieldValues["IFUEvent_x002d_Info"] == null || String.IsNullOrEmpty(ifuEvent.FieldValues["IFUEvent_x002d_Info"].ToString())) {
+                    return true;
+                }
+                if (ifuEvent.FieldValues["IFUStartdate"] == null || String.IsNullOrEmpty(ifuEvent.FieldValues["IFUStartdate"].ToString())) {
+                    return true;
+                }
+            }
+
+                return false; // Wenn keine der Properties von oben null oder Leer ist wird ein false zurückgegeben
+        }
+
+
         // Eine Funktion, die überprüft ob die Eigenschaften eines Kontakts überprüft und true zurückgibt,
         // falls eine der Eigentschaften keinen Wert hat.
         public bool CheckProperties(string contactNo, bool isPerson) {

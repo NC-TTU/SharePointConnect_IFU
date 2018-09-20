@@ -317,6 +317,25 @@ namespace SharePointConnect
         }
 
 
+        public bool CheckIfDocumenttypeExists(string term) {
+            List list = this.site.Lists.GetByTitle(this.listName);
+            FieldCollection fields = list.Fields;
+            Field field = fields.GetByInternalNameOrTitle("IFUDocumenttype");
+
+            this.clientContext.Load(fields);
+            this.clientContext.Load(field);
+            this.clientContext.ExecuteQuery();
+
+            TaxonomyField taxonomyField = this.clientContext.CastTo<TaxonomyField>(field);
+            string termId = GetTermIdForTerm(term, taxonomyField.TermSetId);
+
+            if (String.IsNullOrEmpty(termId)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         // Diese Funktion versucht für ein IFUDocument alle Managed Metadatafields zu setzen.
         // Es bekommt ein Dictionary, dass den Managed Metadata Term als Value und den Staticname als Key hat übergeben.
         // Sowie die itemID des betroffenen ListItems und den Namen der Datei.
@@ -439,6 +458,66 @@ namespace SharePointConnect
             }
         }
 
+        
+        private string CheckForTermName(string term, Guid termSetId) {
+            TaxonomySession tSession = TaxonomySession.GetTaxonomySession(this.clientContext);
+            TermStore ts = tSession.GetDefaultSiteCollectionTermStore();
+            TermSet tSet = ts.GetTermSet(termSetId);
+
+            TermCollection terms = tSet.GetAllTerms();
+            this.clientContext.Load(terms);
+            this.clientContext.ExecuteQuery();
+
+            Term targetTerm = terms.Where(t => t.Name == term).First();
+            try {
+                this.clientContext.Load(targetTerm, tid => tid.Id);
+                this.clientContext.ExecuteQuery();
+
+                return targetTerm.Id.ToString();
+
+            } catch (ServerException sex) {
+                if (sex.ServerErrorTypeName == "System.IO.FileNotFoundException") {
+                    return String.Empty;
+                }
+                throw new Exception(sex.Message);
+            }
+        }
+
+        private TermCollection GetTermCollection(Guid termSetId) {
+            TaxonomySession tSession = TaxonomySession.GetTaxonomySession(this.clientContext);
+            TermStore ts = tSession.GetDefaultSiteCollectionTermStore();
+            TermSet tSet = ts.GetTermSet(termSetId);
+
+            return tSet.GetAllTerms();
+        }
+
+        public List<string> GetAllDocumenttypes() {
+            List<string> termList = new List<string>();
+
+            List targetList = this.site.Lists.GetByTitle(this.listName);
+            FieldCollection fields = targetList.Fields;
+            Field field = fields.GetByInternalNameOrTitle("IFUDocumenttype");
+
+
+            this.clientContext.Load(fields);
+            this.clientContext.Load(field);
+            this.clientContext.ExecuteQuery();
+
+            TaxonomyField taxonomyField = this.clientContext.CastTo<TaxonomyField>(field);
+            TermCollection terms = GetTermCollection(taxonomyField.TermSetId);
+            this.clientContext.Load(terms);
+            this.clientContext.ExecuteQuery();
+
+            foreach (Term t in terms) {
+                this.clientContext.Load(t, n => n.Name);
+                this.clientContext.ExecuteQuery();
+                termList.Add(t.Name);
+            }
+
+            return termList;
+        }
+
+
         // GetTermIdFromTerm bekommt einmal den Documenttype und die GUID des Feldes übergeben.
         // Danach versucht die Funktion über die TaxonomySession an erlaubten Metadaten für
         // das Feld zu kommen. Wenn der Documenttype zulässig ist, wird am Ende die Documenttype GUID
@@ -464,9 +543,11 @@ namespace SharePointConnect
 
             this.clientContext.ExecuteQuery();
 
-            if (termMatches != null && termMatches.Count() > 0)
+            if (termMatches != null && termMatches.Count() > 0) {
                 termId = termMatches.First().Id.ToString();
-
+            } else {
+                termId = CheckForTermName(term, termSetId);
+            }
             return termId;
 
         }

@@ -14,13 +14,15 @@ namespace SharePointConnect
         readonly decimal amount;
         readonly string barcode;
         readonly DateTime dueDate;
+        readonly DateTime createdAt;
 
-        public Invoice(string vendorNo, string externalDocNo, decimal amount, string barcode, DateTime dueDate) {
+        public Invoice(string vendorNo, string externalDocNo, decimal amount, string barcode, DateTime dueDate, DateTime createdAt) {
             this.vendorNo = vendorNo;
             this.externalDocNo = externalDocNo;
             this.amount = amount;
             this.barcode = barcode;
             this.dueDate = dueDate;
+            this.createdAt = createdAt;
         }
 
         public Invoice(Dictionary<string,object> invoice) {
@@ -29,6 +31,7 @@ namespace SharePointConnect
             this.amount = 0.0m;
             this.barcode = String.Empty;
             this.dueDate = default(DateTime);
+            this.createdAt = default(DateTime);
 
             foreach(KeyValuePair<string, object> pair in invoice) {
                 if (pair.Value != null) {
@@ -48,6 +51,9 @@ namespace SharePointConnect
                         case "IFUInvoiceDueDate":
                             this.dueDate = DateTime.Parse(pair.Value.ToString());
                             break;
+                        case "Created":
+                            this.createdAt = DateTime.Parse(pair.Value.ToString());
+                            break;
                     }
                 }
             }
@@ -58,6 +64,6 @@ namespace SharePointConnect
         public decimal GetAmount() { return this.amount; }
         public string GetBarcode() { return this.barcode; }
         public DateTime GetDueDate() { return this.dueDate; }
-
+        public DateTime GetCreatedAt() { return this.createdAt; }
     }
 }

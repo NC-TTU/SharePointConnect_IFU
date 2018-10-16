@@ -7,13 +7,14 @@ using Microsoft.SharePoint.Client;
 using System.Net;
 using System.IO;
 using log4net;
-
+using Microsoft.SharePoint.Client.Taxonomy;
 
 namespace SharePointConnect
 {
     public static class InboxSynchronizer {
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(InboxSynchronizer));
+    
 
         #region Invoices
 
@@ -661,7 +662,7 @@ namespace SharePointConnect
                     li.ParseAndSetFieldValue("ApprovalState", "in Prüfung");
                     li.Update();
                 }
-
+                
                 clientContext.ExecuteQuery();
 
                 return feeList;
@@ -716,13 +717,53 @@ namespace SharePointConnect
                         scannedDocuments.Add(new ScannedDocument(li.FieldValues, filePath, responsibleUser.LoginName.Split('|')[1]));
                     } else {
                         scannedDocuments.Add(new ScannedDocument(li.FieldValues, filePath, String.Empty));
-                    }
-                    li.DeleteObject();                 
+                    }                 
                 }
                 clientContext.ExecuteQuery();
             }
             return scannedDocuments;
-        } 
+        }
+
+        public static bool DeleteScannedDocument(string url, string user, string password, string listName, Guid guid) {
+            string[] parts = user.Split('\\');
+            try {
+                using (ClientContext clientContext = new ClientContext(url)) {
+                    clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
+
+                    Web site = clientContext.Web;
+
+                    List list = site.Lists.GetByTitle(listName);
+
+                    CamlQuery query = new CamlQuery() {
+                        ViewXml = "<View Scope=\"RecursiveAll\">" +
+                                      "<Query>" +
+                                          "<Where>" +
+                                              "<Eq>" +
+                                                  "<FieldRef Name=\"GUID\"/>" +
+                                                  "<Value Type=\"GUID\">" + guid + "</Value>" +
+                                              "</Eq>" +
+                                          "</Where>" +
+                                      "</Query>" +
+                                  "</View>"
+                    };
+
+                    ListItemCollection itemColl = list.GetItems(query);
+                    clientContext.Load(itemColl);
+                    clientContext.ExecuteQuery();
+
+                    ListItem item = itemColl.First();
+                    item.DeleteObject();
+
+                    clientContext.ExecuteQuery();
+
+                    return true;
+                }
+            } catch (Exception ex) {
+                logger.Error(ex.Message);
+                logger.Debug(ex.StackTrace);
+                return false;
+            }
+        }
         #endregion
     }
 }

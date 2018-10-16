@@ -483,6 +483,7 @@ namespace SharePointConnect
             }
         }
 
+        #region Documenttypes
         private TermCollection GetTermCollection(Guid termSetId) {
             TaxonomySession tSession = TaxonomySession.GetTaxonomySession(this.clientContext);
             TermStore ts = tSession.GetDefaultSiteCollectionTermStore();
@@ -516,6 +517,7 @@ namespace SharePointConnect
 
             return termList;
         }
+        #endregion
 
 
         // GetTermIdFromTerm bekommt einmal den Documenttype und die GUID des Feldes übergeben.

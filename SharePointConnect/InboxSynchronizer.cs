@@ -90,17 +90,17 @@ namespace SharePointConnect
                     clientContext.Load(itemColl);
                     clientContext.ExecuteQuery();
 
-                    ListItem item = null;
-                    foreach (ListItem li in itemColl) {
-                        clientContext.Load(li);
-                        clientContext.ExecuteQuery();
-                        if (li.FieldValues["IFUInvoiceBarcode"] != null) {
-                            if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
-                                item = li;
-                                break;
-                            }
-                        }
-                    }
+                    ListItem item = (ListItem)itemColl.Where(li => (li.FieldValues["IFUInvoiceBarcode"].ToString()) == barcode);
+                    /* foreach (ListItem li in itemColl) {
+                         clientContext.Load(li);
+                         clientContext.ExecuteQuery();
+                         if (li.FieldValues["IFUInvoiceBarcode"] != null) {
+                             if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
+                                 item = li;
+                                 break;
+                             }
+                         }
+                     }*/
 
                     if (item != null) {
                         clientContext.Load(item);
@@ -150,8 +150,9 @@ namespace SharePointConnect
                     clientContext.Load(itemColl);
                     clientContext.ExecuteQuery();
 
-                    ListItem item = null;
-                    foreach (ListItem li in itemColl) {
+
+                    ListItem item =(ListItem)itemColl.Where(li => (li.FieldValues["IFUInvoiceBarcode"].ToString())==barcode);
+                    /*foreach (ListItem li in itemColl) {
                         clientContext.Load(li);
                         clientContext.ExecuteQuery();
                         if (li.FieldValues["IFUInvoiceBarcode"] != null) {
@@ -160,7 +161,7 @@ namespace SharePointConnect
                                 break;
                             }
                         }
-                    }
+                    }*/
 
                     if (item != null) {
                         clientContext.Load(item);
@@ -613,7 +614,7 @@ namespace SharePointConnect
                 clientContext.ExecuteQuery();
 
                 ListItem item = itemColl.First();
-                item.ParseAndSetFieldValue("ApprovalState", "abgehlehnt");
+                item.ParseAndSetFieldValue("ApprovalState", "abgelehnt");
                 item.Update();
 
                 clientContext.ExecuteQuery();

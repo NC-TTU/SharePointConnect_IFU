@@ -87,10 +87,11 @@ namespace SharePointConnect
                     };
 
                     ListItemCollection itemColl = list.GetItems(query);
+
                     clientContext.Load(itemColl);
                     clientContext.ExecuteQuery();
 
-                    ListItem item = (ListItem)itemColl.Where(li => (li.FieldValues["IFUInvoiceBarcode"].ToString()) == barcode);
+                    ListItem item= itemColl.Where(li => (li.FieldValues["IFUInvoiceBarcode"].ToString()) == barcode).First();
                     /* foreach (ListItem li in itemColl) {
                          clientContext.Load(li);
                          clientContext.ExecuteQuery();
@@ -101,8 +102,9 @@ namespace SharePointConnect
                              }
                          }
                      }*/
-
+                    
                     if (item != null) {
+
                         clientContext.Load(item);
                         clientContext.ExecuteQuery();
 
@@ -110,6 +112,8 @@ namespace SharePointConnect
                         item.Update();
 
                         clientContext.ExecuteQuery();
+                    } else {
+                        logger.Error("Invoice was not found: " + barcode);
                     }
                 }
             } catch (Exception ex) {
@@ -151,18 +155,18 @@ namespace SharePointConnect
                     clientContext.ExecuteQuery();
 
 
-                    ListItem item =(ListItem)itemColl.Where(li => (li.FieldValues["IFUInvoiceBarcode"].ToString())==barcode);
-                    /*foreach (ListItem li in itemColl) {
-                        clientContext.Load(li);
-                        clientContext.ExecuteQuery();
-                        if (li.FieldValues["IFUInvoiceBarcode"] != null) {
-                            if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
-                                item = li;
-                                break;
-                            }
-                        }
-                    }*/
-
+                    ListItem item = itemColl.Where(li => (li.FieldValues["IFUInvoiceBarcode"].ToString()) == barcode).First();
+                    /* foreach (ListItem li in itemColl) {
+                         clientContext.Load(li);
+                         clientContext.ExecuteQuery();
+                         if (li.FieldValues["IFUInvoiceBarcode"] != null) {
+                             if (li.FieldValues["IFUInvoiceBarcode"].ToString() == barcode) {
+                                 item = li;
+                                 break;
+                             }
+                         }
+                     }*/
+                    
                     if (item != null) {
                         clientContext.Load(item);
                         clientContext.ExecuteQuery();

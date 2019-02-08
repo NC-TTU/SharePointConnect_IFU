@@ -2,6 +2,9 @@
 /// Erstellt von TTU
 /// Erstellt am 12.01.18
 /// 
+/// 08.02.19 Changed functionnames from CheckProperty to CheckPropertyEvent and 
+///          CheckPropertyContact
+/// 
 /// 05.04.18 Anpassungen für Nutzung von IFU Content Types. 
 /// 
 /// Die FolderCreator-Klasse soll auf gerufen werden, wenn

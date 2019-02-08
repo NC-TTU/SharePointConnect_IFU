@@ -338,9 +338,9 @@ namespace SharePointConnect
             }
         }
 
-        // Eine Funktion, die überprüft ob die Eigenschaften einer Veranstaltung überprüft und true zurückgibt,
+        // Eine Funktion, die überprüft ob die Eigenschaften einer Veranstaltung und true zurückgibt,
         // falls eine der Eigenschaften keinen Wert hat.
-        public bool CheckProperties(string templateNo, string eventNo) {
+        public bool CheckPropertiesEvent(string templateNo, string eventNo) {
 
             List eventList = this.site.Lists.GetByTitle(this.listName);
             Folder rootFolder = eventList.RootFolder;
@@ -373,7 +373,7 @@ namespace SharePointConnect
 
         // Eine Funktion, die überprüft ob die Eigenschaften eines Kontakts überprüft und true zurückgibt,
         // falls eine der Eigentschaften keinen Wert hat.
-        public bool CheckProperties(string contactNo, bool isPerson) {
+        public bool CheckPropertiesContact(string contactNo, bool isPerson) {
             try {
                 if (!HasConnection()) {
                     GetConnection();

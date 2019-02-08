@@ -397,8 +397,13 @@ namespace SharePointConnect
                 string termId = GetTermIdForTerm(documentType, txField.TermSetId);
 
                 this.clientContext.Load(list.RootFolder);
-                this.clientContext.ExecuteQuery(); 
-                Microsoft.SharePoint.Client.File file = this.site.GetFileByServerRelativeUrl(list.RootFolder.ServerRelativeUrl + "/" + templateNo + "/" + ifuTown + "/" + fileName);
+                this.clientContext.ExecuteQuery();
+                Microsoft.SharePoint.Client.File file;
+                if (String.IsNullOrEmpty(ifuTown)){
+                    file = this.site.GetFileByServerRelativeUrl(list.RootFolder.ServerRelativeUrl + "/" + templateNo + "/" + fileName);
+                } else {
+                    file = this.site.GetFileByServerRelativeUrl(list.RootFolder.ServerRelativeUrl + "/" + templateNo + "/" + ifuTown + "/" + fileName);
+                }
                 ListItem item = file.ListItemAllFields;
                 this.clientContext.Load(item);
                 this.clientContext.ExecuteQuery();
@@ -1321,18 +1326,26 @@ namespace SharePointConnect
             var fileInfo = new FileInfo(filePath);
             string fileName = fileInfo.Name;
 
-            FileCollection files = parent.Files;
+            try {
+                FileCollection files = parent.Files;
+                this.clientContext.Load(files);
+                this.clientContext.ExecuteQuery();
 
-            this.clientContext.Load(files);
-            this.clientContext.ExecuteQuery();
+                Microsoft.SharePoint.Client.File file = files.Where(f => f.Name == fileInfo.Name).First();
+                this.clientContext.Load(file);
+                this.clientContext.ExecuteQuery();
 
-            foreach (Microsoft.SharePoint.Client.File file in files) {
+                return true;
 
-                if (fileName == file.Name) {
-                    return true;
-                }
+            } catch (Exception ex) {
+                return false;
             }
-            return false;
+            /* foreach(Microsoft.SharePoint.Client.File file in files) {
+
+                 if(fileName == file.Name) {
+                     return true;
+                 }
+             }*/
         }
 
         /****Getter/Setter****/

@@ -34,10 +34,16 @@ namespace SharePointConnect
                         ViewXml = "<View Scope=\"RecursiveAll\">" +
                                       "<Query>" +
                                           "<Where>" +
-                                              "<Eq>" +
-                                                  "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
-                                                  "<Value Type=\"Text\">" + "Frei zur Zahlung" + "</Value>" +
-                                              "</Eq>" +
+                                              "<And>" +
+                                                  "<Eq>" +
+                                                      "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
+                                                      "<Value Type=\"Text\">" + "Frei zur Zahlung" + "</Value>" +
+                                                  "</Eq>" +
+                                                  "<Eq>" +
+                                                      "<FieldRef Name=\"BBNAV\"/>" +
+                                                      "<Value Type=\"Boolean\">" + "1" + "</Value>" +
+                                                  "</Eq>" +
+                                              "</And>" +
                                          "</Where>" +
                                      "</Query>" +
                                  "</View>"

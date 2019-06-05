@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NAS Conception GmbH")]
 [assembly: AssemblyProduct("SharePointConnect")]
-[assembly: AssemblyCopyright("Copyright NAS Conception GmbH ©  2017")]
+[assembly: AssemblyCopyright("Copyright NAS Conception GmbH ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

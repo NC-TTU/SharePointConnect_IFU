@@ -69,7 +69,7 @@ namespace SharePointConnect
         }
 
         [ApplicationVisible]
-        public void Refresh() {
+        public void RefreshSPC() {
             this.SPUserControl.RefreshSPC();
         }
 

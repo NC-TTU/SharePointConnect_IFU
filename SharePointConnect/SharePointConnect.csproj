@@ -39,8 +39,9 @@
     <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Dynamics.Framework.UI.Extensibility">
-      <HintPath>..\..\..\..\..\..\Program Files\Microsoft Dynamics NAV\90\Service\Add-ins\Microsoft.Dynamics.Framework.UI.Extensibility.dll</HintPath>
+    <Reference Include="Microsoft.Dynamics.Framework.UI.Extensibility, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SharePointConnectBC\Microsoft.Dynamics.Framework.UI.Extensibility.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Office.Client.Education, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.SharePoint.Client.Online.CSOM.15.0.4859.1003\lib\net40-full\Microsoft.Office.Client.Education.dll</HintPath>

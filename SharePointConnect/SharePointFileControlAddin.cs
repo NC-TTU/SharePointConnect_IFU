@@ -49,7 +49,7 @@ namespace SharePointConnect
                 Dock = DockStyle.Fill,
                 Size = new Size(200, 200)
             };
-            panel.MaximumSize = new Size(800, 800);
+            
             panel.AutoSize = true;
             this.panel.Controls.Add(this.SPUserControl);
             this.panel.HandleCreated += (s, e) => AddInReady();

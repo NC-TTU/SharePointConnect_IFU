@@ -43,15 +43,21 @@ namespace SharePointConnect
 
         protected override Control CreateControl() {
 
-            this.SPUserControl = new SharePointUserControl { Dock = DockStyle.Fill };
 
             this.panel = new Panel {
                 Dock = DockStyle.Fill,
-                Size = new Size(200, 200)
+                Size = new Size(200, 200),
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink
             };
-     
-            panel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            panel.AutoSize = true;
+
+
+            this.SPUserControl = new SharePointUserControl {
+                Dock = DockStyle.Fill,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Size = panel.ClientSize
+            };
             this.panel.Controls.Add(this.SPUserControl);
             this.panel.HandleCreated += (s, e) => AddInReady();
             this.SPUserControl.Create += () => Create();

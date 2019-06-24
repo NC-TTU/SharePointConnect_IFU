@@ -11,26 +11,31 @@ using Microsoft.SharePoint.Client.Taxonomy;
 
 namespace SharePointConnect
 {
-    public static class InboxSynchronizer {
+    public static class InboxSynchronizer
+    {
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(InboxSynchronizer));
-    
+
 
         #region Invoices
 
-        static public List<Invoice> GetInvoicesFromSharePoint(string baseUrl, string subWebsite, string user, string password, string listName) {
-            try {
+        static public List<Invoice> GetInvoicesFromSharePoint(string baseUrl, string subWebsite, string user, string password, string listName)
+        {
+            try
+            {
                 List<Invoice> invoiceList = new List<Invoice>();
                 string[] parts = user.Split('\\');
 
-                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite))
+                {
                     clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                     Web site = clientContext.Web;
 
                     List list = site.Lists.GetByTitle(listName);
 
-                    CamlQuery query = new CamlQuery() {
+                    CamlQuery query = new CamlQuery()
+                    {
                         ViewXml = "<View Scope=\"RecursiveAll\">" +
                                       "<Query>" +
                                           "<Where>" +
@@ -53,7 +58,8 @@ namespace SharePointConnect
                     clientContext.Load(itemColl);
                     clientContext.ExecuteQuery();
 
-                    foreach (ListItem li in itemColl) {
+                    foreach (ListItem li in itemColl)
+                    {
                         clientContext.Load(li);
                         clientContext.ExecuteQuery();
 
@@ -61,32 +67,44 @@ namespace SharePointConnect
                     }
                 }
                 return invoiceList;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
                 return new List<Invoice>();
             }
         }
 
-        static public void ChangeInvoiceStatusToInvoiced(string baseUrl, string subWebsite, string user, string password, string listName, string barcode) {
-            try {
+        static public void ChangeInvoiceStatusToInvoiced(string baseUrl, string subWebsite, string user, string password, string listName, string barcode)
+        {
+            try
+            {
                 string[] parts = user.Split('\\');
 
-                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite))
+                {
                     clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                     Web site = clientContext.Web;
 
                     List list = site.Lists.GetByTitle(listName);
 
-                    CamlQuery query = new CamlQuery() {
+                    CamlQuery query = new CamlQuery()
+                    {
                         ViewXml = "<View Scope=\"RecursiveAll\">" +
                                       "<Query>" +
                                           "<Where>" +
-                                              "<Eq>" +
-                                                  "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
-                                                  "<Value Type=\"Text\">" + "Frei zur Zahlung" + "</Value>" +
-                                              "</Eq>" +
+                                             "<And>" +
+                                                  "<Eq>" +
+                                                      "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
+                                                      "<Value Type=\"Text\">" + "Frei zur Zahlung" + "</Value>" +
+                                                  "</Eq>" +
+                                                  "<Eq>" +
+                                                      "<FieldRef Name=\"IFUInvoiceBarcode\"/>" +
+                                                      "<Value Type=\"Text\">" + barcode + "</Value>" +
+                                                  "</Eq>" +
+                                              "</And>" +
                                          "</Where>" +
                                      "</Query>" +
                                  "</View>"
@@ -97,7 +115,7 @@ namespace SharePointConnect
                     clientContext.Load(itemColl);
                     clientContext.ExecuteQuery();
 
-                    ListItem item= itemColl.Where(li => (li.FieldValues["IFUInvoiceBarcode"].ToString()) == barcode).First();
+                    ListItem item = itemColl.Where(li => (li.FieldValues["IFUInvoiceBarcode"].ToString()) == barcode).First();
                     /* foreach (ListItem li in itemColl) {
                          clientContext.Load(li);
                          clientContext.ExecuteQuery();
@@ -108,8 +126,9 @@ namespace SharePointConnect
                              }
                          }
                      }*/
-                    
-                    if (item != null) {
+
+                    if (item != null)
+                    {
 
                         clientContext.Load(item);
                         clientContext.ExecuteQuery();
@@ -118,11 +137,15 @@ namespace SharePointConnect
                         item.Update();
 
                         clientContext.ExecuteQuery();
-                    } else {
+                    }
+                    else
+                    {
                         logger.Error("Invoice was not found: " + barcode);
                     }
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
             }
@@ -132,25 +155,35 @@ namespace SharePointConnect
 
 
 
-        static public void ChangeInvoiceStatusToPaid(string baseUrl, string subWebsite, string user, string password, string listName, string barcode) {
-            try {
+        static public void ChangeInvoiceStatusToPaid(string baseUrl, string subWebsite, string user, string password, string listName, string barcode)
+        {
+            try
+            {
                 string[] parts = user.Split('\\');
 
-                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite))
+                {
                     clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                     Web site = clientContext.Web;
 
                     List list = site.Lists.GetByTitle(listName);
 
-                    CamlQuery query = new CamlQuery() {
+                    CamlQuery query = new CamlQuery()
+                    {
                         ViewXml = "<View Scope=\"RecursiveAll\"> " +
                                       "<Query>" +
                                           "<Where>" +
-                                              "<Eq>" +
-                                                  "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
-                                                  "<Value Type=\"Text\">" + "Fakturiert" + "</Value>" +
-                                              "</Eq>" +
+                                               "<And>" +
+                                                  "<Eq>" +
+                                                      "<FieldRef Name=\"IFUInvoiceStatus\"/>" +
+                                                      "<Value Type=\"Text\">" + "Fakturiert" + "</Value>" +
+                                                  "</Eq>" +
+                                                  "<Eq>" +
+                                                      "<FieldRef Name=\"IFUInvoiceBarcode\"/>" +
+                                                      "<Value Type=\"Text\">" + barcode + "</Value>" +
+                                                  "</Eq>" +
+                                              "</And>" +
                                           "</Where>" +
                                       "</Query>" +
                                   "</View>"
@@ -172,8 +205,9 @@ namespace SharePointConnect
                              }
                          }
                      }*/
-                    
-                    if (item != null) {
+
+                    if (item != null)
+                    {
                         clientContext.Load(item);
                         clientContext.ExecuteQuery();
 
@@ -183,28 +217,34 @@ namespace SharePointConnect
                         clientContext.ExecuteQuery();
                     }
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
             }
         }
-        
-        #endregion  
+
+        #endregion
 
 
         #region Registrations
-        static public void UpdateRegistration(string baseUrl, string subWebsite, string user, string password, string listName, BrochureOrder brochureOrder) {
-            try {
+        static public void UpdateRegistration(string baseUrl, string subWebsite, string user, string password, string listName, BrochureOrder brochureOrder)
+        {
+            try
+            {
                 string[] parts = user.Split('\\');
 
-                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite))
+                {
                     clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                     Web site = clientContext.Web;
 
                     List list = site.Lists.GetByTitle(listName);
 
-                    CamlQuery query = new CamlQuery() {
+                    CamlQuery query = new CamlQuery()
+                    {
                         ViewXml = "<View Scope=\"RecursiveAll\">" +
                                         "<Query>" +
                                             "<Where>" +
@@ -219,7 +259,8 @@ namespace SharePointConnect
 
                     string status = "";
 
-                    switch (brochureOrder.GetStatus()) {
+                    switch (brochureOrder.GetStatus())
+                    {
                         case 0:
                             status = "Neu";
                             break;
@@ -247,13 +288,16 @@ namespace SharePointConnect
                     item.Update();
                     clientContext.ExecuteQuery();
                 }
-            }catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
             }
         }
 
-        static public List<string> SplitString(string stringToBeSeperated, char seperator) {
+        static public List<string> SplitString(string stringToBeSeperated, char seperator)
+        {
             List<string> strings = new List<string>();
 
             strings.AddRange(stringToBeSeperated.Split(seperator));
@@ -261,18 +305,22 @@ namespace SharePointConnect
             return strings;
         }
 
-        static public void UpdateRegistration(string baseUrl, string subWebsite, string user, string password, string listName, Registration registration) {
-            try {
+        static public void UpdateRegistration(string baseUrl, string subWebsite, string user, string password, string listName, Registration registration)
+        {
+            try
+            {
                 string[] parts = user.Split('\\');
 
-                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite))
+                {
                     clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                     Web site = clientContext.Web;
 
                     List list = site.Lists.GetByTitle(listName);
 
-                    CamlQuery query = new CamlQuery() {
+                    CamlQuery query = new CamlQuery()
+                    {
                         ViewXml = "<View Scope=\"RecursiveAll\">" +
                                       "<Query>" +
                                           "<Where>" +
@@ -287,7 +335,8 @@ namespace SharePointConnect
 
                     string status = "";
 
-                    switch (registration.GetStatus()) {
+                    switch (registration.GetStatus())
+                    {
                         case 0:
                             status = "Neu";
                             break;
@@ -316,27 +365,32 @@ namespace SharePointConnect
                     clientContext.ExecuteQuery();
 
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
             }
         }
-        
 
 
-        public static List<Registration> SynchronizeRegistrations(string baseUrl, string subWebsite, string user, string password, string listName, string navTempPath) {
+
+        public static List<Registration> SynchronizeRegistrations(string baseUrl, string subWebsite, string user, string password, string listName, string navTempPath)
+        {
 
             List<Registration> registrations = new List<Registration>();
             string[] parts = user.Split('\\');
 
-            using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+            using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite))
+            {
                 clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                 Web site = clientContext.Web;
 
                 List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
+                CamlQuery query = new CamlQuery()
+                {
                     ViewXml = "<View Scope=\"RecursiveAll\"> " +
                                   "<Query>" +
                                       "<Where>" +
@@ -353,14 +407,16 @@ namespace SharePointConnect
                 clientContext.Load(itemColl);
                 clientContext.ExecuteQuery();
 
-                foreach (ListItem li in itemColl) {
+                foreach (ListItem li in itemColl)
+                {
                     clientContext.Load(li, f => f.File);
                     clientContext.ExecuteQuery();
                     string fileServerRelativePath = li.File.ServerRelativeUrl;
                     FileInformation fileInfo = Microsoft.SharePoint.Client.File.OpenBinaryDirect(clientContext, fileServerRelativePath);
                     string filePath = Path.Combine(navTempPath, li.File.Name);
 
-                    using (FileStream fs = System.IO.File.Create(filePath)) {
+                    using (FileStream fs = System.IO.File.Create(filePath))
+                    {
                         fileInfo.Stream.CopyTo(fs);
                     }
 
@@ -374,19 +430,22 @@ namespace SharePointConnect
         #endregion
 
         #region Brochure
-        public static List<BrochureOrder> SynchronizeOrders(string baseUrl, string subWebsite, string user, string password, string listName, string navTempPath) {
+        public static List<BrochureOrder> SynchronizeOrders(string baseUrl, string subWebsite, string user, string password, string listName, string navTempPath)
+        {
 
             List<BrochureOrder> brochureOrders = new List<BrochureOrder>();
             string[] parts = user.Split('\\');
 
-            using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
+            using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite))
+            {
                 clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                 Web site = clientContext.Web;
 
                 List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
+                CamlQuery query = new CamlQuery()
+                {
                     ViewXml = "<View Scope=\"RecursiveAll\"> " +
                                   "<Query>" +
                                       "<Where>" +
@@ -403,14 +462,16 @@ namespace SharePointConnect
                 clientContext.Load(itemColl);
                 clientContext.ExecuteQuery();
 
-                foreach (ListItem li in itemColl) {
+                foreach (ListItem li in itemColl)
+                {
                     clientContext.Load(li, f => f.File);
                     clientContext.ExecuteQuery();
                     string fileServerRelativePath = li.File.ServerRelativeUrl;
                     FileInformation fileInfo = Microsoft.SharePoint.Client.File.OpenBinaryDirect(clientContext, fileServerRelativePath);
                     string filePath = Path.Combine(navTempPath, li.File.Name);
 
-                    using (FileStream fs = System.IO.File.Create(filePath)) {
+                    using (FileStream fs = System.IO.File.Create(filePath))
+                    {
                         fileInfo.Stream.CopyTo(fs);
                     }
                     brochureOrders.Add(new BrochureOrder(li.FieldValues, filePath));
@@ -419,61 +480,68 @@ namespace SharePointConnect
             return brochureOrders;
         }
 
-        static public void UpdateBrochureOrder(string baseUrl, string subWebsite, string user, string password, string listName, BrochureOrder brochureOrder) {
-            try { 
-            string[] parts = user.Split('\\');
+        static public void UpdateBrochureOrder(string baseUrl, string subWebsite, string user, string password, string listName, BrochureOrder brochureOrder)
+        {
+            try
+            {
+                string[] parts = user.Split('\\');
 
-            using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite)) {
-                clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
+                using (ClientContext clientContext = new ClientContext(baseUrl + subWebsite))
+                {
+                    clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
-                Web site = clientContext.Web;
+                    Web site = clientContext.Web;
 
-                List list = site.Lists.GetByTitle(listName);
+                    List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
-                    ViewXml = "<View Scope=\"RecursiveAll\">" +
-                                  "<Query>" +
-                                      "<Where>" +
-                                          "<Eq>" +
-                                              "<FieldRef Name=\"GUID\"/>" +
-                                              "<Value Type=\"GUID\">" + brochureOrder.GetGuid() + "</Value>" +
-                                          "</Eq>" +
-                                      "</Where>" +
-                                  "</Query>" +
-                              "</View>"
-                };
+                    CamlQuery query = new CamlQuery()
+                    {
+                        ViewXml = "<View Scope=\"RecursiveAll\">" +
+                                      "<Query>" +
+                                          "<Where>" +
+                                              "<Eq>" +
+                                                  "<FieldRef Name=\"GUID\"/>" +
+                                                  "<Value Type=\"GUID\">" + brochureOrder.GetGuid() + "</Value>" +
+                                              "</Eq>" +
+                                          "</Where>" +
+                                      "</Query>" +
+                                  "</View>"
+                    };
 
-                string status = "";
+                    string status = "";
 
-                switch (brochureOrder.GetStatus()) {
-                    case 0:
-                        status = "Neu";
-                        break;
-                    case 1:
-                        status = "Verarbeitet";
-                        break;
-                    case 2:
-                        status = "Zurückgestellt";
-                        break;
+                    switch (brochureOrder.GetStatus())
+                    {
+                        case 0:
+                            status = "Neu";
+                            break;
+                        case 1:
+                            status = "Verarbeitet";
+                            break;
+                        case 2:
+                            status = "Zurückgestellt";
+                            break;
+                    }
+
+
+                    ListItemCollection itemColl = list.GetItems(query);
+                    clientContext.Load(itemColl);
+                    clientContext.ExecuteQuery();
+                    FieldUrlValue urlValue = new FieldUrlValue();
+
+                    ListItem item = itemColl.First();
+                    item.ParseAndSetFieldValue("IFUKuAnmldgStatus", status);
+                    item.ParseAndSetFieldValue("IFUKuAnmldgContactNumber", brochureOrder.GetContactNo());
+                    item.ParseAndSetFieldValue("IFUEventnumber", brochureOrder.GetEventNo());
+                    item.ParseAndSetFieldValue("IFUEventTemplateNumber", brochureOrder.GetEventTemplateNo());
+                    item.ParseAndSetFieldValue("IFUCourseNumber", brochureOrder.GetCourseNo());
+                    item.ParseAndSetFieldValue("IFUArticleNumber", brochureOrder.GetArticleNo());
+                    item.Update();
+                    clientContext.ExecuteQuery();
                 }
-
-
-                ListItemCollection itemColl = list.GetItems(query);
-                clientContext.Load(itemColl);
-                clientContext.ExecuteQuery();
-                FieldUrlValue urlValue = new FieldUrlValue();
-
-                ListItem item = itemColl.First();
-                item.ParseAndSetFieldValue("IFUKuAnmldgStatus", status);
-                item.ParseAndSetFieldValue("IFUKuAnmldgContactNumber", brochureOrder.GetContactNo());
-                item.ParseAndSetFieldValue("IFUEventnumber", brochureOrder.GetEventNo());
-                item.ParseAndSetFieldValue("IFUEventTemplateNumber", brochureOrder.GetEventTemplateNo());
-                item.ParseAndSetFieldValue("IFUCourseNumber", brochureOrder.GetCourseNo());
-                item.ParseAndSetFieldValue("IFUArticleNumber", brochureOrder.GetArticleNo());
-                item.Update();
-                clientContext.ExecuteQuery();
             }
-            } catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
             }
@@ -482,18 +550,21 @@ namespace SharePointConnect
         #endregion
 
         #region Fee
-        public static List<FeeAttachment> GetFeeAttachment(string url, string user, string password, string listName, Guid guid) {
+        public static List<FeeAttachment> GetFeeAttachment(string url, string user, string password, string listName, Guid guid)
+        {
             List<FeeAttachment> feeAttachments = new List<FeeAttachment>();
             string[] parts = user.Split('\\');
 
-            using (ClientContext clientContext = new ClientContext(url)) {
+            using (ClientContext clientContext = new ClientContext(url))
+            {
                 clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                 Web site = clientContext.Web;
 
                 List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
+                CamlQuery query = new CamlQuery()
+                {
                     ViewXml = "<View Scope=\"RecursiveAll\">" +
                                   "<Query>" +
                                       "<Where>" +
@@ -514,7 +585,8 @@ namespace SharePointConnect
                 AttachmentCollection attachments = item.AttachmentFiles;
                 clientContext.Load(attachments);
                 clientContext.ExecuteQuery();
-                foreach (Attachment a in attachments) {
+                foreach (Attachment a in attachments)
+                {
                     feeAttachments.Add(new FeeAttachment(url.Substring(0, url.Length - 1) + a.ServerRelativeUrl));
                 }
             }
@@ -523,17 +595,20 @@ namespace SharePointConnect
         }
 
 
-        public static void SetFileUrlFee(string url, string user, string password, string listName, Guid guid, string serverFilePath) {
+        public static void SetFileUrlFee(string url, string user, string password, string listName, Guid guid, string serverFilePath)
+        {
             string[] parts = user.Split('\\');
 
-            using (ClientContext clientContext = new ClientContext(url)) {
+            using (ClientContext clientContext = new ClientContext(url))
+            {
                 clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                 Web site = clientContext.Web;
 
                 List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
+                CamlQuery query = new CamlQuery()
+                {
                     ViewXml = "<View Scope=\"RecursiveAll\">" +
                                   "<Query>" +
                                       "<Where>" +
@@ -561,17 +636,20 @@ namespace SharePointConnect
             }
         }
 
-        public static void ApproveFee(string url, string user, string password, string listName, Guid guid) {
+        public static void ApproveFee(string url, string user, string password, string listName, Guid guid)
+        {
             string[] parts = user.Split('\\');
 
-            using (ClientContext clientContext = new ClientContext(url)) {
+            using (ClientContext clientContext = new ClientContext(url))
+            {
                 clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                 Web site = clientContext.Web;
 
                 List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
+                CamlQuery query = new CamlQuery()
+                {
                     ViewXml = "<View Scope=\"RecursiveAll\">" +
                                   "<Query>" +
                                       "<Where>" +
@@ -596,17 +674,20 @@ namespace SharePointConnect
             }
         }
 
-        public static void DeclineFee(string url, string user, string password, string listName, Guid guid) {
+        public static void DeclineFee(string url, string user, string password, string listName, Guid guid)
+        {
             string[] parts = user.Split('\\');
 
-            using (ClientContext clientContext = new ClientContext(url)) {
+            using (ClientContext clientContext = new ClientContext(url))
+            {
                 clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                 Web site = clientContext.Web;
 
                 List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
+                CamlQuery query = new CamlQuery()
+                {
                     ViewXml = "<View Scope=\"RecursiveAll\">" +
                                   "<Query>" +
                                       "<Where>" +
@@ -631,20 +712,23 @@ namespace SharePointConnect
             }
         }
 
-        public static List<Fee> SynchronizeFee(string url, string user, string password, string listName) {
+        public static List<Fee> SynchronizeFee(string url, string user, string password, string listName)
+        {
 
             List<Fee> feeList = new List<Fee>();
             string[] parts = user.Split('\\');
             bool hasAttachment = false;
 
-            using (ClientContext clientContext = new ClientContext(url)) {
+            using (ClientContext clientContext = new ClientContext(url))
+            {
                 clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                 Web site = clientContext.Web;
 
                 List list = site.Lists.GetByTitle(listName);
 
-                CamlQuery query = new CamlQuery() {
+                CamlQuery query = new CamlQuery()
+                {
                     ViewXml = "<View Scope=\"RecursiveAll\"> " +
                                   "<Query>" +
                                       "<Where>" +
@@ -660,11 +744,13 @@ namespace SharePointConnect
                 clientContext.Load(itemColl);
                 clientContext.ExecuteQuery();
 
-                foreach (ListItem li in itemColl) {
+                foreach (ListItem li in itemColl)
+                {
                     clientContext.Load(li.AttachmentFiles);
                     clientContext.ExecuteQuery();
 
-                    if (li.AttachmentFiles.Count > 0) {
+                    if (li.AttachmentFiles.Count > 0)
+                    {
                         hasAttachment = true;
                     }
 
@@ -673,7 +759,7 @@ namespace SharePointConnect
                     li.ParseAndSetFieldValue("ApprovalState", "in Prüfung");
                     li.Update();
                 }
-                
+
                 clientContext.ExecuteQuery();
 
                 return feeList;
@@ -684,11 +770,13 @@ namespace SharePointConnect
 
         #region ScannedDocuments
 
-        public static List<ScannedDocument> SynchronizeScannedDocuments(string url, string user, string password, string listName, string navTempPath) {
+        public static List<ScannedDocument> SynchronizeScannedDocuments(string url, string user, string password, string listName, string navTempPath)
+        {
             List<ScannedDocument> scannedDocuments = new List<ScannedDocument>();
             string[] parts = user.Split('\\');
 
-            using(ClientContext clientContext = new ClientContext(url)) {
+            using (ClientContext clientContext = new ClientContext(url))
+            {
                 clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                 Web site = clientContext.Web;
@@ -699,7 +787,8 @@ namespace SharePointConnect
                 clientContext.Load(itemColl);
                 clientContext.ExecuteQuery();
 
-                for(int i = 0; i < itemColl.Count; ++i){
+                for (int i = 0; i < itemColl.Count; ++i)
+                {
                     ListItem li = itemColl[i];
                     clientContext.Load(li, f => f.File);
                     clientContext.ExecuteQuery();
@@ -710,42 +799,51 @@ namespace SharePointConnect
                     clientContext.Load(li);
                     clientContext.ExecuteQuery();
 
-                    Dictionary<string,object> userValue = li.FieldValues.Where(fv => fv.Key == "IFUZustaendigePerson").ToDictionary(fv=> fv.Key, fv => fv.Value);
-                    FieldUserValue fuv = (FieldUserValue) userValue.First().Value;
+                    Dictionary<string, object> userValue = li.FieldValues.Where(fv => fv.Key == "IFUZustaendigePerson").ToDictionary(fv => fv.Key, fv => fv.Value);
+                    FieldUserValue fuv = (FieldUserValue)userValue.First().Value;
 
                     clientContext.Load(site.SiteUsers);
                     clientContext.ExecuteQuery();
                     User responsibleUser = null;
-                    if (fuv != null) {
+                    if (fuv != null)
+                    {
                         responsibleUser = site.SiteUsers.Where(u => u.Id == fuv.LookupId).First();
                         clientContext.Load(responsibleUser);
                         clientContext.ExecuteQuery();
                     }
-                    using (FileStream fs = System.IO.File.Create(filePath)) {
+                    using (FileStream fs = System.IO.File.Create(filePath))
+                    {
                         fileInfo.Stream.CopyTo(fs);
                     }
-                    if (responsibleUser != null) {
+                    if (responsibleUser != null)
+                    {
                         scannedDocuments.Add(new ScannedDocument(li.FieldValues, filePath, responsibleUser.LoginName.Split('|')[1]));
-                    } else {
+                    }
+                    else
+                    {
                         scannedDocuments.Add(new ScannedDocument(li.FieldValues, filePath, String.Empty));
-                    }                 
+                    }
                 }
                 clientContext.ExecuteQuery();
             }
             return scannedDocuments;
         }
 
-        public static bool DeleteScannedDocument(string url, string user, string password, string listName, Guid guid) {
+        public static bool DeleteScannedDocument(string url, string user, string password, string listName, Guid guid)
+        {
             string[] parts = user.Split('\\');
-            try {
-                using (ClientContext clientContext = new ClientContext(url)) {
+            try
+            {
+                using (ClientContext clientContext = new ClientContext(url))
+                {
                     clientContext.Credentials = new NetworkCredential(parts[1], password, parts[0]);
 
                     Web site = clientContext.Web;
 
                     List list = site.Lists.GetByTitle(listName);
 
-                    CamlQuery query = new CamlQuery() {
+                    CamlQuery query = new CamlQuery()
+                    {
                         ViewXml = "<View Scope=\"RecursiveAll\">" +
                                       "<Query>" +
                                           "<Where>" +
@@ -769,7 +867,9 @@ namespace SharePointConnect
 
                     return true;
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 logger.Error(ex.Message);
                 logger.Debug(ex.StackTrace);
                 return false;

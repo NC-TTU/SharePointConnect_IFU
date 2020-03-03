@@ -16,8 +16,10 @@ namespace SharePointConnect
         readonly DateTime dueDate;
         readonly DateTime createdAt;
         readonly bool creditMemo;
+        readonly string eventNo;
 
-        public Invoice(string vendorNo, string externalDocNo, decimal amount, string barcode, DateTime dueDate, DateTime createdAt, bool creditMemo) {
+
+        public Invoice(string vendorNo, string externalDocNo, decimal amount, string barcode, DateTime dueDate, DateTime createdAt, bool creditMemo, string eventNo) {
             this.vendorNo = vendorNo;
             this.externalDocNo = externalDocNo;
             this.amount = amount;
@@ -25,6 +27,7 @@ namespace SharePointConnect
             this.dueDate = dueDate;
             this.createdAt = createdAt;
             this.creditMemo = creditMemo;
+            this.eventNo = eventNo;
         }
 
         public Invoice(Dictionary<string,object> invoice) {
@@ -34,6 +37,7 @@ namespace SharePointConnect
             this.barcode = String.Empty;
             this.dueDate = default(DateTime);
             this.createdAt = default(DateTime);
+            this.eventNo = String.Empty;
 
             foreach(KeyValuePair<string, object> pair in invoice) {
                 if (pair.Value != null) {
@@ -59,6 +63,9 @@ namespace SharePointConnect
                         case "Gutschrift":
                             this.creditMemo = (bool)pair.Value;
                             break;
+                        case "IFUEventnumber":
+                            this.eventNo = pair.Value.ToString();
+                            break;
                     }
                 }
             }
@@ -71,5 +78,6 @@ namespace SharePointConnect
         public DateTime GetDueDate() { return this.dueDate; }
         public DateTime GetCreatedAt() { return this.createdAt; }
         public bool IsCreditMemo() { return this.creditMemo; }
+        public string GetEventNo() {return this.eventNo; }
     }
 }
